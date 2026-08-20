@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { OrbitControls, Grid } from '@react-three/drei';
+import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureRecognition } from '@/hooks/useGestureRecognition';
@@ -46,10 +47,18 @@ export function Scene3D() {
         rotation={[-Math.PI / 2, 0, 0]} // Horizontal ground
       />
 
-      {/* Interactive scene objects */}
-      {objects.map((object) => (
-        <InteractiveObject key={object.id} object={object} />
-      ))}
+      {/* Physics simulation */}
+      <Physics gravity={[0, -9.81, 0]}>
+        {/* Ground plane collider */}
+        <RigidBody type="fixed" position={[0, 0, 0]}>
+          <CuboidCollider args={[50, 0.1, 50]} />
+        </RigidBody>
+
+        {/* Interactive scene objects */}
+        {objects.map((object) => (
+          <InteractiveObject key={object.id} object={object} />
+        ))}
+      </Physics>
 
       {/* Hand cursors */}
       {cursors.map((cursor) => (
