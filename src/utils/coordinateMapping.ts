@@ -3,36 +3,27 @@ import type { HandLandmark } from '@/types/hand.types';
 
 /**
  * Maps 2D hand landmark coordinates to 3D world space
- * Uses the camera and a virtual plane to project 2D points into 3D
+ * First-person perspective: reaching into the virtual environment
  */
 export function mapHandTo3D(
   landmark: HandLandmark,
-  camera: THREE.Camera,
+  _camera: THREE.Camera,
   _canvasWidth: number,
   _canvasHeight: number
 ): THREE.Vector3 {
-  // Convert normalized coordinates (0-1) to NDC (-1 to 1)
-  const x = (landmark.x * 2) - 1; // No flip - direct mapping
-  const y = -(landmark.y * 2) + 1; // Flip Y axis
-  
-  // Use z-coordinate from MediaPipe for depth
-  // MediaPipe z is relative to wrist, typically -0.1 to 0.1
-  // Map to a reasonable depth range in 3D space
-  const depth = 5 + (landmark.z * -10); // 0 to 10 units from camera
+  // First-person mapping: hand position directly maps to 3D space in front of viewer
+  // X: left-right movement (MediaPipe 0=left, 1=right)
+  const x = (landmark.x - 0.5) * 6; // Map 0-1 to -3 to +3 (left to right)
 
-  // Create vector in NDC space
-  const vector = new THREE.Vector3(x, y, 0.5);
-  
-  // Unproject to world space
-  vector.unproject(camera);
-  
-  // Get direction from camera to point
-  const direction = vector.sub(camera.position).normalize();
-  
-  // Project along direction to desired depth
-  const position = camera.position.clone().add(direction.multiplyScalar(depth));
-  
-  return position;
+  // Y: up-down movement (MediaPipe 0=top, 1=bottom)
+  // Offset to be at comfortable reaching height (around chest to head level)
+  const y = (1 - landmark.y) * 2 + 0.5; // Map 0-1 to 2.5 to 0.5 (top to bottom)
+
+  // Z: depth into screen (MediaPipe z is negative when closer to camera)
+  // Map to comfortable reaching distance in front of viewer
+  const z = -3 + (landmark.z * 5); // Map z to reach space (-3 to -8)
+
+  return new THREE.Vector3(x, y, z);
 }
 
 /**
