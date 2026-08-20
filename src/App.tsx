@@ -1,4 +1,5 @@
 import { HandTrackingCanvas } from './components/HandTrackingCanvas/HandTrackingCanvas';
+import { WebcamFeed } from './components/WebcamFeed/WebcamFeed';
 
 function App() {
   return (
@@ -11,6 +12,9 @@ function App() {
 
       {/* 3D Canvas */}
       <HandTrackingCanvas />
+
+      {/* Webcam Feed */}
+      <WebcamFeed showPreview={true} />
 
       {/* Info panel */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white p-4 rounded-lg text-sm max-w-xs">
