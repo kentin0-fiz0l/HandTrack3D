@@ -1,15 +1,23 @@
 import { useWebcam } from '@/hooks/useWebcam';
+import { useHandTracking } from '@/hooks/useHandTracking';
+import { HandOverlay } from './HandOverlay';
 
 interface WebcamFeedProps {
   showPreview?: boolean;
 }
 
+const PREVIEW_WIDTH = 320;
+const PREVIEW_HEIGHT = 240;
+
 export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   const { videoRef, isReady, error } = useWebcam();
 
+  // Initialize hand tracking
+  useHandTracking(videoRef.current, isReady);
+
   if (error) {
     return (
-      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg max-w-xs">
+      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg max-w-xs z-50">
         <h3 className="font-semibold mb-1">Webcam Error</h3>
         <p className="text-sm">{error}</p>
       </div>
@@ -28,17 +36,18 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
 
       {/* Optional preview in bottom-right */}
       {showPreview && isReady && (
-        <div className="fixed bottom-4 right-4 bg-black/70 p-2 rounded-lg">
-          <div className="relative">
+        <div className="fixed bottom-4 right-4 bg-black/70 p-2 rounded-lg z-40">
+          <div className="relative" style={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}>
             <video
               ref={videoRef}
-              className="w-64 h-48 rounded object-cover"
+              className="w-full h-full rounded object-cover"
               playsInline
               muted
             />
+            <HandOverlay width={PREVIEW_WIDTH} height={PREVIEW_HEIGHT} />
             <div className="absolute top-2 right-2 bg-green-500 w-3 h-3 rounded-full animate-pulse" />
           </div>
-          <p className="text-white text-xs mt-1 text-center">Webcam Active</p>
+          <p className="text-white text-xs mt-1 text-center">Hand Tracking Active</p>
         </div>
       )}
     </>
