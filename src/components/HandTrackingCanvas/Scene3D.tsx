@@ -2,6 +2,7 @@
 import { OrbitControls, Grid } from '@react-three/drei';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
+import { useGestureRecognition } from '@/hooks/useGestureRecognition';
 import { HandMesh } from './HandMesh';
 import type { SceneObject } from '@/types/scene.types';
 
@@ -24,6 +25,9 @@ export function Scene3D() {
 
   // Map hand positions to 3D space
   useHandTo3DMapping();
+
+  // Detect gestures
+  useGestureRecognition();
 
   return (
     <>
@@ -58,6 +62,7 @@ export function Scene3D() {
       {cursors.map((cursor) => (
         <HandMesh
           key={cursor.id}
+          handId={cursor.id}
           position={cursor.position}
           handedness={cursor.handedness}
         />
