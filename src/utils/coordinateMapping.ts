@@ -19,9 +19,9 @@ export function mapHandTo3D(
   // Offset to be at comfortable reaching height (around chest to head level)
   const y = (1 - landmark.y) * 2 + 0.5; // Map 0-1 to 2.5 to 0.5 (top to bottom)
 
-  // Z: depth into screen (MediaPipe z is negative when closer to camera)
-  // Map to comfortable reaching distance in front of viewer
-  const z = -3 + (landmark.z * 5); // Map z to reach space (-3 to -8)
+  // Z: depth - hand toward you brings object closer to camera (larger)
+  // MediaPipe z is negative when hand closer to camera
+  const z = -3 - (landmark.z * 5); // Hand closer → less negative z → larger object
 
   return new THREE.Vector3(x, y, z);
 }
