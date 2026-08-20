@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { OrbitControls, Grid } from '@react-three/drei';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
+import { HandMesh } from './HandMesh';
 import type { SceneObject } from '@/types/scene.types';
 
 function SceneObjectRenderer({ object }: { object: SceneObject }) {
@@ -18,6 +20,10 @@ function SceneObjectRenderer({ object }: { object: SceneObject }) {
 
 export function Scene3D() {
   const objects = useSceneStore((state) => state.objects);
+  const cursors = useHandCursorStore((state) => state.cursors);
+
+  // Map hand positions to 3D space
+  useHandTo3DMapping();
 
   return (
     <>
@@ -46,6 +52,15 @@ export function Scene3D() {
       {/* Scene objects */}
       {objects.map((object) => (
         <SceneObjectRenderer key={object.id} object={object} />
+      ))}
+
+      {/* Hand cursors */}
+      {cursors.map((cursor) => (
+        <HandMesh
+          key={cursor.id}
+          position={cursor.position}
+          handedness={cursor.handedness}
+        />
       ))}
     </>
   );
