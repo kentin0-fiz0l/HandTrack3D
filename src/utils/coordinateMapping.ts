@@ -12,8 +12,8 @@ export function mapHandTo3D(
   _canvasHeight: number
 ): THREE.Vector3 {
   // First-person mapping: hand position directly maps to 3D space in front of viewer
-  // X: left-right movement (MediaPipe 0=left, 1=right)
-  const x = (landmark.x - 0.5) * 6; // Map 0-1 to -3 to +3 (left to right)
+  // X: left-right movement (flipped for superimposed view)
+  const x = (0.5 - landmark.x) * 6; // Flip so left hand is on left, right hand on right
 
   // Y: up-down movement (MediaPipe 0=top, 1=bottom)
   // Offset to be at comfortable reaching height (around chest to head level)
