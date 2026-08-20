@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
@@ -22,7 +22,7 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
   const cursors = useHandCursorStore((state) => state.cursors);
   const gestures = useGestureStore((state) => state.gestures);
 
-  const [isNearHand, setIsNearHand] = useRef(false);
+  const [isNearHand, setIsNearHand] = useState(false);
 
   useFrame(() => {
     if (!meshRef.current) return;
