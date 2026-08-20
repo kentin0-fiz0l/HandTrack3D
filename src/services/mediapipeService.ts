@@ -76,7 +76,9 @@ export async function initializeMediaPipe(
           })
         ) ?? landmarks;
 
-        const handedness = results.multiHandedness[i].label as 'Left' | 'Right';
+        // Flip handedness because webcam is mirrored
+        const rawHandedness = results.multiHandedness[i].label as 'Left' | 'Right';
+        const handedness = rawHandedness === 'Left' ? 'Right' : 'Left';
 
         hands.push({
           id: `hand-${handedness.toLowerCase()}-${i}`,

@@ -12,7 +12,7 @@ export function mapHandTo3D(
   _canvasHeight: number
 ): THREE.Vector3 {
   // Convert normalized coordinates (0-1) to NDC (-1 to 1)
-  const x = -((landmark.x * 2) - 1); // Flip X axis for mirror effect
+  const x = (landmark.x * 2) - 1; // No flip - direct mapping
   const y = -(landmark.y * 2) + 1; // Flip Y axis
   
   // Use z-coordinate from MediaPipe for depth
