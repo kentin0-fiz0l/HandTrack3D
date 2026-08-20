@@ -4,20 +4,7 @@ import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureRecognition } from '@/hooks/useGestureRecognition';
 import { HandMesh } from './HandMesh';
-import type { SceneObject } from '@/types/scene.types';
-
-function SceneObjectRenderer({ object }: { object: SceneObject }) {
-  const { type, position, rotation, scale, color } = object;
-
-  return (
-    <mesh position={position} rotation={rotation} scale={scale}>
-      {type === 'box' && <boxGeometry args={[1, 1, 1]} />}
-      {type === 'sphere' && <sphereGeometry args={[0.5, 32, 32]} />}
-      {type === 'torus' && <torusGeometry args={[0.5, 0.2, 16, 32]} />}
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-}
+import { InteractiveObject } from './InteractiveObject';
 
 export function Scene3D() {
   const objects = useSceneStore((state) => state.objects);
@@ -53,9 +40,9 @@ export function Scene3D() {
         position={[0, -1, 0]}
       />
 
-      {/* Scene objects */}
+      {/* Interactive scene objects */}
       {objects.map((object) => (
-        <SceneObjectRenderer key={object.id} object={object} />
+        <InteractiveObject key={object.id} object={object} />
       ))}
 
       {/* Hand cursors */}

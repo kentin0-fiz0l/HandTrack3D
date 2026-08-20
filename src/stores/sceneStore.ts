@@ -3,12 +3,14 @@ import type { SceneObject, GrabbedObject } from '@/types/scene.types';
 
 interface SceneStore {
   objects: SceneObject[];
-  grabbedObject: GrabbedObject | null;
-  setGrabbedObject: (grabbed: GrabbedObject | null) => void;
+  grabbedObjects: Map<string, GrabbedObject>; // Map handId -> GrabbedObject
+  grabObject: (handId: string, objectId: string, offset: [number, number, number]) => void;
+  releaseObject: (handId: string) => void;
   updateObjectPosition: (id: string, position: [number, number, number]) => void;
+  isObjectGrabbed: (objectId: string) => boolean;
 }
 
-export const useSceneStore = create<SceneStore>((set) => ({
+export const useSceneStore = create<SceneStore>((set, get) => ({
   objects: [
     {
       id: 'box-1',
@@ -35,12 +37,30 @@ export const useSceneStore = create<SceneStore>((set) => ({
       color: '#f59e0b',
     },
   ],
-  grabbedObject: null,
-  setGrabbedObject: (grabbed) => set({ grabbedObject: grabbed }),
+  grabbedObjects: new Map(),
+  grabObject: (handId, objectId, offset) =>
+    set((state) => {
+      const newGrabbedObjects = new Map(state.grabbedObjects);
+      newGrabbedObjects.set(handId, { id: objectId, handId, offset });
+      return { grabbedObjects: newGrabbedObjects };
+    }),
+  releaseObject: (handId) =>
+    set((state) => {
+      const newGrabbedObjects = new Map(state.grabbedObjects);
+      newGrabbedObjects.delete(handId);
+      return { grabbedObjects: newGrabbedObjects };
+    }),
   updateObjectPosition: (id, position) =>
     set((state) => ({
       objects: state.objects.map((obj) =>
         obj.id === id ? { ...obj, position } : obj
       ),
     })),
+  isObjectGrabbed: (objectId) => {
+    const grabbedObjects = get().grabbedObjects;
+    for (const grabbed of grabbedObjects.values()) {
+      if (grabbed.id === objectId) return true;
+    }
+    return false;
+  },
 }));
