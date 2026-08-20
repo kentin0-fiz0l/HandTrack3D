@@ -6,8 +6,9 @@ export function HandTrackingCanvas() {
     <div className="w-full h-screen">
       <Canvas
         camera={{
-          position: [0, 2, 5],
+          position: [0, 1.6, 0], // Eye level height, first-person position
           fov: 75,
+          rotation: [0, 0, 0], // Looking straight ahead
         }}
         shadows
       >

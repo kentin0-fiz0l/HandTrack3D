@@ -15,7 +15,7 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
     {
       id: 'box-1',
       type: 'box',
-      position: [-2, 0, 0],
+      position: [-2, 1.5, -4], // Left, at eye level, in front
       rotation: [0, 0, 0],
       scale: 1,
       color: '#3b82f6',
@@ -23,7 +23,7 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
     {
       id: 'sphere-1',
       type: 'sphere',
-      position: [0, 0, 0],
+      position: [0, 1.5, -4], // Center, at eye level, in front
       rotation: [0, 0, 0],
       scale: 1,
       color: '#10b981',
@@ -31,7 +31,7 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
     {
       id: 'torus-1',
       type: 'torus',
-      position: [2, 0, 0],
+      position: [2, 1.5, -4], // Right, at eye level, in front
       rotation: [0, 0, 0],
       scale: 1,
       color: '#f59e0b',
