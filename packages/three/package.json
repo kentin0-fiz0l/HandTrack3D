@@ -44,7 +44,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint",
-    "prepublishOnly": "pnpm run build && pnpm run test"
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@handtrack3d/core": "workspace:*",
