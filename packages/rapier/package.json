@@ -1,6 +1,6 @@
 {
   "name": "@handtrack3d/rapier",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "description": "Rapier physics adapter for hand tracking with React Three Fiber",
   "keywords": [
     "rapier",
@@ -45,9 +45,9 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@handtrack3d/core": "workspace:*",
-    "@handtrack3d/react": "workspace:*",
-    "@handtrack3d/three": "workspace:*"
+    "@handtrack3d/core": "^0.2.0-alpha.0",
+    "@handtrack3d/react": "^0.2.0-alpha.1",
+    "@handtrack3d/three": "^0.2.0-alpha.1"
   },
   "peerDependencies": {
     "@react-three/rapier": "^1.0.0 || ^2.0.0",

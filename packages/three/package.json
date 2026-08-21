@@ -1,6 +1,6 @@
 {
   "name": "@handtrack3d/three",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "description": "Three.js integration for hand tracking with MediaPipe and React Three Fiber",
   "keywords": [
     "three",
@@ -47,8 +47,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@handtrack3d/core": "workspace:*",
-    "@handtrack3d/react": "workspace:*"
+    "@handtrack3d/core": "^0.2.0-alpha.0",
+    "@handtrack3d/react": "^0.2.0-alpha.1"
   },
   "peerDependencies": {
     "@react-three/fiber": "^8.0.0 || ^9.0.0",

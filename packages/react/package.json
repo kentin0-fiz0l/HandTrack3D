@@ -1,6 +1,6 @@
 {
   "name": "@handtrack3d/react",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "description": "React hooks and components for hand tracking with MediaPipe",
   "keywords": [
     "react",
@@ -45,7 +45,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@handtrack3d/core": "workspace:*"
+    "@handtrack3d/core": "^0.2.0-alpha.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
