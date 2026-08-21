@@ -71,14 +71,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        if: github.event.inputs.dry_run == 'false' && github.event_name == 'push'
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')
         run: npm publish --provenance --access public
         working-directory: packages/${{ matrix.package }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        if: github.event.inputs.dry_run == 'false' && github.event_name == 'push' && matrix.package == 'core'
+        if: ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')) && matrix.package == 'core'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
