@@ -18,7 +18,7 @@ import { BodyType } from '../adapters/types';
  * This interface represents the Cannon.js Body API.
  * In actual usage, you would import from 'cannon-es'.
  */
-interface CannonBody {
+export interface CannonBody {
   type: number;
   velocity: { x: number; y: number; z: number };
   angularVelocity: { x: number; y: number; z: number };
