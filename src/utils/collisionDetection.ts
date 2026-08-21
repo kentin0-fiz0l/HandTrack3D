@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getSettings } from '@/stores/settingsStore';
 
 /**
  * Check if a point is within grab range of an object
@@ -6,10 +7,12 @@ import * as THREE from 'three';
 export function isInGrabRange(
   cursorPosition: THREE.Vector3,
   objectPosition: THREE.Vector3,
-  grabRange: number = 1.5
+  grabRange?: number
 ): boolean {
+  const settings = getSettings();
+  const effectiveGrabRange = grabRange ?? settings.grabRange;
   const distance = cursorPosition.distanceTo(objectPosition);
-  return distance < grabRange;
+  return distance < effectiveGrabRange;
 }
 
 /**

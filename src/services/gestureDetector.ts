@@ -1,5 +1,6 @@
 import type { HandLandmark } from '@/types/hand.types';
 import type { GestureType } from '@/types/gesture.types';
+import { getSettings } from '@/stores/settingsStore';
 
 /**
  * Calculate distance between two landmarks
@@ -50,8 +51,9 @@ function isFingerExtended(
     angles.push(angle);
   }
 
-  // Finger is extended if all joint angles are > 160 degrees
-  return angles.every((angle) => angle > 160);
+  // Finger is extended if all joint angles are > fingerExtensionAngle
+  const settings = getSettings();
+  return angles.every((angle) => angle > settings.fingerExtensionAngle);
 }
 
 /**
@@ -63,7 +65,8 @@ export function detectPinch(landmarks: HandLandmark[]): boolean {
   const dist = distance(thumbTip, indexTip);
 
   // Pinch threshold: very close together
-  return dist < 0.05;
+  const settings = getSettings();
+  return dist < settings.pinchThreshold;
 }
 
 /**
@@ -96,9 +99,10 @@ export function detectFist(landmarks: HandLandmark[]): boolean {
   ];
 
   // All fingertips should be within a small radius of wrist
+  const settings = getSettings();
   const allCurled = fingertips.every((tip) => {
     const dist = distance(tip, wrist);
-    return dist < 0.15; // Close to wrist = curled
+    return dist < settings.fistCurlThreshold; // Close to wrist = curled
   });
 
   return allCurled;

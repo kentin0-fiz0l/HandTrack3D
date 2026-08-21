@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Hand, HandLandmark } from '@/types/hand.types';
+import { getSettings } from '@/stores/settingsStore';
 
 // MediaPipe Hands is loaded via CDN script tag in index.html
 declare global {
@@ -48,11 +49,14 @@ export async function initializeMediaPipe(
     },
   });
 
+  // Get settings from store
+  const settings = getSettings();
+
   handsInstance.setOptions({
-    maxNumHands: 2,
+    maxNumHands: settings.maxHands,
     modelComplexity: 1,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
+    minDetectionConfidence: settings.detectionConfidence,
+    minTrackingConfidence: settings.trackingConfidence,
   });
 
   handsInstance.onResults((results: any) => {
@@ -100,4 +104,20 @@ export function closeMediaPipe() {
     handsInstance.close();
     handsInstance = null;
   }
+}
+
+// Update MediaPipe options when tracking settings change
+export function updateMediaPipeOptions() {
+  if (!handsInstance) {
+    return;
+  }
+
+  const settings = getSettings();
+
+  handsInstance.setOptions({
+    maxNumHands: settings.maxHands,
+    modelComplexity: 1,
+    minDetectionConfidence: settings.detectionConfidence,
+    minTrackingConfidence: settings.trackingConfidence,
+  });
 }

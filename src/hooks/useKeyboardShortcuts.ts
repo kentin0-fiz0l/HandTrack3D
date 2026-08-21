@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 export function useKeyboardShortcuts(callbacks: {
   onReset?: () => void;
   onTogglePanel?: () => void;
+  onToggleSettings?: () => void;
 }) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -16,6 +17,12 @@ export function useKeyboardShortcuts(callbacks: {
       if (event.code === 'KeyH' && !event.repeat) {
         event.preventDefault();
         callbacks.onTogglePanel?.();
+      }
+
+      // S: Toggle settings
+      if (event.code === 'KeyS' && !event.repeat) {
+        event.preventDefault();
+        callbacks.onToggleSettings?.();
       }
     }
 

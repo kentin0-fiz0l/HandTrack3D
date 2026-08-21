@@ -6,6 +6,7 @@ import { useSceneStore } from '@/stores/sceneStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
 import { isInGrabRange, calculateGrabOffset } from '@/utils/collisionDetection';
+import { useSettingsStore } from '@/stores/settingsStore';
 import * as THREE from 'three';
 import type { SceneObject } from '@/types/scene.types';
 
@@ -22,6 +23,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
   const updateObjectPosition = useSceneStore((state) => state.updateObjectPosition);
   const cursors = useHandCursorStore((state) => state.cursors);
   const gestures = useGestureStore((state) => state.gestures);
+  const restitution = useSettingsStore((state) => state.restitution);
+  const friction = useSettingsStore((state) => state.friction);
 
   const [isNearHand, setIsNearHand] = useState(false);
   const prevPositionRef = useRef<THREE.Vector3>(new THREE.Vector3(...object.position));
@@ -105,8 +108,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
       position={position}
       rotation={rotation}
       mass={1}
-      restitution={0.5} // Bounciness
-      friction={0.7}
+      restitution={restitution} // Bounciness
+      friction={friction}
       linearDamping={0.5}
       angularDamping={0.5}
     >

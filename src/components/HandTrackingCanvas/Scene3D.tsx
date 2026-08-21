@@ -4,12 +4,14 @@ import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureRecognition } from '@/hooks/useGestureRecognition';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { HandMesh } from './HandMesh';
 import { InteractiveObject } from './InteractiveObject';
 
 export function Scene3D() {
   const objects = useSceneStore((state) => state.objects);
   const cursors = useHandCursorStore((state) => state.cursors);
+  const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
 
   // Map hand positions to 3D space
   useHandTo3DMapping();
@@ -48,7 +50,7 @@ export function Scene3D() {
       />
 
       {/* Physics simulation */}
-      <Physics gravity={[0, -9.81, 0]}>
+      <Physics gravity={gravityEnabled ? [0, -9.81, 0] : [0, 0, 0]}>
         {/* Ground plane collider */}
         <RigidBody type="fixed" position={[0, 0, 0]}>
           <CuboidCollider args={[50, 0.1, 50]} />

@@ -1,5 +1,6 @@
 import { useWebcam } from '@/hooks/useWebcam';
 import { useHandTracking } from '@/hooks/useHandTracking';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { HandOverlay } from './HandOverlay';
 
 interface WebcamFeedProps {
@@ -11,6 +12,7 @@ const PREVIEW_HEIGHT = 240;
 
 export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   const { videoRef, isReady, error } = useWebcam();
+  const showWebcam = useSettingsStore((state) => state.showWebcam);
 
   // Initialize hand tracking
   useHandTracking(videoRef.current, isReady);
@@ -35,7 +37,7 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
       />
 
       {/* Optional preview in bottom-right */}
-      {showPreview && isReady && (
+      {showPreview && isReady && showWebcam && (
         <div className="fixed bottom-4 right-4 bg-black/70 p-2 rounded-lg z-40">
           <div className="relative" style={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}>
             <video
