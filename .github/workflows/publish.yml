@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build all packages
+        run: pnpm build
+
       - name: Run linter
         run: pnpm run lint
         working-directory: packages/${{ matrix.package }}
@@ -51,10 +54,6 @@ jobs:
         run: pnpm run test
         working-directory: packages/${{ matrix.package }}
         continue-on-error: true
-
-      - name: Build package
-        run: pnpm run build
-        working-directory: packages/${{ matrix.package }}
 
       - name: Check package contents
         run: |
