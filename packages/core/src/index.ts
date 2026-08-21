@@ -25,6 +25,9 @@ export {
   detectPoint,
 } from './gestures/detector';
 
+// Multi-hand gesture detection
+export { MultiHandGestureDetector } from './gestures/multi-hand-detector';
+
 // Built-in gesture plugins
 export {
   PinchGesturePlugin,
@@ -37,6 +40,14 @@ export {
   SwipeDownGesturePlugin,
 } from './gestures/plugins';
 export type { SwipeGestureOptions } from './gestures/plugins';
+
+// Multi-hand gesture plugins
+export {
+  TwoHandScaleGesturePlugin,
+  TwoHandRotateGesturePlugin,
+  ClapGesturePlugin,
+} from './gestures/plugins';
+export type { TwoHandScaleOptions } from './gestures/plugins';
 
 // Coordinate mapping utilities
 export {
@@ -79,5 +90,7 @@ export type {
   InteractionEvent,
   InteractionEventType,
   EventListener,
+  MultiHandGesturePlugin,
+  MultiHandGestureResult,
 } from './plugins';
 export { PluginRegistry, GesturePluginRegistry } from './plugins';

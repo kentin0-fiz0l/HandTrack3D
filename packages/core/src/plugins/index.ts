@@ -16,4 +16,6 @@ export type {
   EventListener,
 } from './types';
 
+export type { MultiHandGesturePlugin, MultiHandGestureResult } from './multi-hand-types';
+
 export { PluginRegistry, GesturePluginRegistry } from './registry';

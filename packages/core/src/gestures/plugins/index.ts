@@ -39,3 +39,18 @@ export {
  * - ASL Thumbs-Down
  */
 export { ASLThumbsUpGesturePlugin, ASLThumbsDownGesturePlugin } from './asl-thumbs-up';
+
+/**
+ * Multi-hand gesture plugins
+ *
+ * Gestures requiring two or more hands:
+ * - Two-hand scale (pinch zoom)
+ * - Two-hand rotate
+ * - Clap
+ */
+export {
+  TwoHandScaleGesturePlugin,
+  TwoHandRotateGesturePlugin,
+  ClapGesturePlugin,
+  type TwoHandScaleOptions,
+} from './two-hand-scale';
