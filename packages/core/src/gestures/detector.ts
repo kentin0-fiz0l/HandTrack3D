@@ -1,6 +1,14 @@
 import type { HandLandmark } from '../types/hand';
 import type { GestureType, GestureSettings } from '../types/gesture';
 import { DEFAULT_GESTURE_SETTINGS } from '../types/gesture';
+import type { GesturePlugin } from '../plugins';
+import { GesturePluginRegistry } from '../plugins';
+import {
+  PinchGesturePlugin,
+  OpenHandGesturePlugin,
+  FistGesturePlugin,
+  PointGesturePlugin,
+} from './plugins';
 
 /**
  * Calculate Euclidean distance between two landmarks
@@ -183,17 +191,33 @@ export function detectPoint(
 }
 
 /**
- * Gesture detector class for stateful gesture recognition
+ * Gesture detector class for stateful gesture recognition with plugin support
  */
 export class GestureDetector {
   private settings: GestureSettings;
+  private pluginRegistry: GesturePluginRegistry;
 
   /**
    * Create a new gesture detector
    * @param settings - Optional gesture detection settings
+   * @param options - Optional configuration
+   * @param options.registerBuiltins - Auto-register built-in gestures (default: true)
    */
-  constructor(settings: Partial<GestureSettings> = {}) {
+  constructor(
+    settings: Partial<GestureSettings> = {},
+    options: { registerBuiltins?: boolean } = {}
+  ) {
     this.settings = { ...DEFAULT_GESTURE_SETTINGS, ...settings };
+    this.pluginRegistry = new GesturePluginRegistry();
+
+    // Auto-register built-in gesture plugins by default
+    const { registerBuiltins = true } = options;
+    if (registerBuiltins) {
+      this.registerGesture(new PinchGesturePlugin());
+      this.registerGesture(new PointGesturePlugin());
+      this.registerGesture(new FistGesturePlugin());
+      this.registerGesture(new OpenHandGesturePlugin());
+    }
   }
 
   /**
@@ -213,24 +237,61 @@ export class GestureDetector {
   }
 
   /**
-   * Detect gesture from hand landmarks
+   * Register a custom gesture plugin
+   * @param plugin - Gesture plugin to register
+   * @example
+   * ```typescript
+   * const detector = new GestureDetector();
+   * detector.registerGesture(new ThumbsUpPlugin());
+   * ```
+   */
+  registerGesture(plugin: GesturePlugin): void {
+    this.pluginRegistry.register(plugin);
+  }
+
+  /**
+   * Unregister a gesture plugin by name
+   * @param name - Plugin name to unregister
+   * @returns True if plugin was found and removed
+   * @example
+   * ```typescript
+   * detector.unregisterGesture('builtin:pinch'); // Disable pinch detection
+   * ```
+   */
+  unregisterGesture(name: string): boolean {
+    return this.pluginRegistry.unregister(name);
+  }
+
+  /**
+   * Get all registered gesture plugins
+   * @returns Array of registered plugins (sorted by priority)
+   */
+  getGesturePlugins(): GesturePlugin[] {
+    return this.pluginRegistry.list();
+  }
+
+  /**
+   * Check if a gesture plugin is registered
+   * @param name - Plugin name
+   * @returns True if plugin exists
+   */
+  hasGesture(name: string): boolean {
+    return this.pluginRegistry.has(name);
+  }
+
+  /**
+   * Detect gesture from hand landmarks using registered plugins
    * @param landmarks - Hand landmarks
    * @returns Detected gesture type
    */
   detectGesture(landmarks: HandLandmark[]): GestureType {
-    // Check gestures in priority order
-    if (detectPinch(landmarks, this.settings)) {
-      return 'pinch';
+    // Check plugins in priority order (highest priority first)
+    for (const plugin of this.pluginRegistry.list()) {
+      if (plugin.detect(landmarks, this.settings)) {
+        return plugin.gestureType as GestureType;
+      }
     }
-    if (detectPoint(landmarks, this.settings)) {
-      return 'point';
-    }
-    if (detectFist(landmarks, this.settings)) {
-      return 'fist';
-    }
-    if (detectOpenHand(landmarks, this.settings)) {
-      return 'open';
-    }
+
     return 'none';
   }
 }

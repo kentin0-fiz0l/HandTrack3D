@@ -27,6 +27,14 @@ export type { PointInteractionOptions } from './interactions/PointInteraction';
 export { PinchToZoomInteraction } from './interactions/PinchToZoomInteraction';
 export type { PinchToZoomInteractionOptions } from './interactions/PinchToZoomInteraction';
 
+// Example interaction plugins
+export { PointSelectPlugin } from './interactions/PointSelectPlugin';
+export type {
+  HandState as InteractionHandState,
+  SelectionEvent,
+  PointSelectOptions,
+} from './interactions/PointSelectPlugin';
+
 // Coordinate mapping utilities
 export {
   landmarkToVector3,

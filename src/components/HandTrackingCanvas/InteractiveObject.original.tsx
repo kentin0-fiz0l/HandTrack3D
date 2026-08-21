@@ -1,14 +1,13 @@
 // @ts-nocheck
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RigidBody, CuboidCollider, BallCollider, CylinderCollider, CapsuleCollider } from '@react-three/rapier';
 import { Cylinder, Cone, Capsule } from '@react-three/drei';
+import { useSceneStore } from '@/stores/sceneStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
-import { isInGrabRange } from '@/utils/collisionDetection';
+import { isInGrabRange, calculateGrabOffset } from '@/utils/collisionDetection';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { GrabPlugin, RapierAdapter } from '@handtrack3d/rapier';
-import type { HandState } from '@handtrack3d/rapier';
 import * as THREE from 'three';
 import type { SceneObject } from '@/types/scene.types';
 
@@ -18,31 +17,28 @@ interface InteractiveObjectProps {
 
 export function InteractiveObject({ object }: InteractiveObjectProps) {
   const rigidBodyRef = useRef<any>(null);
+  const isGrabbed = useSceneStore((state) => state.isObjectGrabbed(object.id));
+  const grabbedObjects = useSceneStore((state) => state.grabbedObjects);
+  const grabObject = useSceneStore((state) => state.grabObject);
+  const releaseObject = useSceneStore((state) => state.releaseObject);
+  const updateObjectPosition = useSceneStore((state) => state.updateObjectPosition);
   const cursors = useHandCursorStore((state) => state.cursors);
   const gestures = useGestureStore((state) => state.gestures);
   const restitution = useSettingsStore((state) => state.restitution);
   const friction = useSettingsStore((state) => state.friction);
 
   const [isNearHand, setIsNearHand] = useState(false);
-
-  // Create grab plugin instance (memoized for performance)
-  const grabPlugin = useMemo(() => {
-    const adapter = new RapierAdapter();
-    return new GrabPlugin(adapter, {
-      grabRadius: 0.5,
-      throwVelocityScale: 60,
-    });
-  }, []);
+  const prevPositionRef = useRef<THREE.Vector3>(new THREE.Vector3(...object.position));
 
   useFrame(() => {
     if (!rigidBodyRef.current) return;
 
     const currentPos = rigidBodyRef.current.translation();
-    const objectPos = new THREE.Vector3(currentPos.x, currentPos.y, currentPos.z);
     let nearHand = false;
 
     // Check each hand cursor
     cursors.forEach((cursor) => {
+      const objectPos = new THREE.Vector3(currentPos.x, currentPos.y, currentPos.z);
       const inRange = isInGrabRange(cursor.position, objectPos);
 
       if (inRange) {
@@ -51,29 +47,54 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
 
       // Get gesture for this hand
       const handGesture = gestures.find((g) => g.handId === cursor.id);
-      const gesture = handGesture?.gesture || 'none';
+      const isPinching = handGesture?.gesture === 'pinch';
+      const isOpen = handGesture?.gesture === 'open';
 
-      // Create hand state for plugin
-      const hand: HandState = {
-        id: cursor.id,
-        position: cursor.position,
-        gesture,
-      };
+      const currentlyGrabbed = grabbedObjects.get(cursor.id);
 
-      // Create rigid bodies map for this object
-      const rigidBodies = new Map([[object.id, rigidBodyRef.current]]);
+      // Grab logic
+      if (inRange && isPinching && !currentlyGrabbed) {
+        // Grab this object
+        const offset = calculateGrabOffset(cursor.position, objectPos);
+        grabObject(cursor.id, object.id, offset.toArray() as [number, number, number]);
+        // Make kinematic (controlled by hand, not physics)
+        rigidBodyRef.current.setBodyType(1, true); // 1 = kinematic
+        rigidBodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      }
 
-      // Update grab plugin (handles grab, hold, release, throw)
-      grabPlugin.update(hand, rigidBodies);
+      // Release logic
+      if (currentlyGrabbed?.id === object.id && isOpen) {
+        // Calculate velocity for throwing
+        const velocity = new THREE.Vector3(
+          currentPos.x - prevPositionRef.current.x,
+          currentPos.y - prevPositionRef.current.y,
+          currentPos.z - prevPositionRef.current.z
+        ).multiplyScalar(60); // Multiply by frame rate approximation
+
+        // Make dynamic again
+        rigidBodyRef.current.setBodyType(0, true); // 0 = dynamic
+        rigidBodyRef.current.setLinvel(velocity, true);
+
+        releaseObject(cursor.id);
+      }
+
+      // Update position if grabbed
+      if (currentlyGrabbed?.id === object.id) {
+        const offset = new THREE.Vector3(...currentlyGrabbed.offset);
+        const newPos = cursor.position.clone().add(offset);
+        rigidBodyRef.current.setTranslation(newPos, true);
+        updateObjectPosition(object.id, newPos.toArray() as [number, number, number]);
+      }
     });
 
+    // Track previous position for velocity calculation
+    prevPositionRef.current.set(currentPos.x, currentPos.y, currentPos.z);
     setIsNearHand(nearHand);
   });
 
   const { type, position, rotation, scale, color } = object;
 
   // Visual feedback
-  const isGrabbed = grabPlugin.isGrabbed(object.id);
   const highlightColor = isGrabbed
     ? '#fbbf24' // Yellow when grabbed
     : isNearHand

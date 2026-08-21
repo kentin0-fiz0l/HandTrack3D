@@ -1,5 +1,8 @@
 /**
  * Available gesture types
+ *
+ * Built-in gestures: none, pinch, open, fist, point, swipeLeft, swipeRight, swipeUp, swipeDown
+ * Custom gestures can be added via GesturePlugin (any string is allowed)
  */
 export type GestureType =
   | 'none'
@@ -10,7 +13,8 @@ export type GestureType =
   | 'swipeLeft'
   | 'swipeRight'
   | 'swipeUp'
-  | 'swipeDown';
+  | 'swipeDown'
+  | (string & {}); // Allow custom gesture types via plugins
 
 /**
  * Detected gesture for a specific hand

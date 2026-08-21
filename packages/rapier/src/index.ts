@@ -3,7 +3,24 @@
  * Rapier physics adapter for hand tracking
  */
 
-export const version = '0.1.0-alpha.0';
+export const version = '0.2.0-alpha.0';
 
-// Placeholder for Rapier physics integration
-// Will be populated during extraction phase
+// Physics adapters
+export type { PhysicsAdapter } from './adapters';
+export { BodyType, RapierAdapter } from './adapters';
+
+// Interaction plugins
+export { GrabPlugin } from './interactions';
+export type { GrabPluginOptions, HandState } from './interactions';
+
+// Utilities
+export {
+  calculateThrowVelocity,
+  applyDamping,
+  calculateSmoothedVelocity,
+  clampMagnitude,
+  isWithinBounds,
+} from './utils';
+
+// React hooks
+export { usePhysicsGrab } from './hooks';
