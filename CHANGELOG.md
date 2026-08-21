@@ -5,6 +5,30 @@ All notable changes to HandTrack3D will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-alpha.1] - 2026-08-21
+
+### Fixed
+
+**Critical npm Publishing Fix**
+- Replaced `workspace:*` dependencies with actual version numbers
+- Packages are now installable from npm registry
+- Fixed "Unsupported URL Type workspace:*" error
+
+**Updated Packages:**
+- `@handtrack3d/react@0.2.0-alpha.1` - Now depends on `@handtrack3d/core@^0.2.0-alpha.0`
+- `@handtrack3d/three@0.2.0-alpha.1` - Now depends on `@handtrack3d/core@^0.2.0-alpha.0` and `@handtrack3d/react@^0.2.0-alpha.1`
+- `@handtrack3d/rapier@0.2.0-alpha.1` - Now depends on all packages with actual version numbers
+
+**Note:** `@handtrack3d/core@0.2.0-alpha.0` remains unchanged (no workspace dependencies)
+
+### Verified
+- ✅ All packages installable via `npm install @handtrack3d/*@alpha`
+- ✅ All imports working correctly
+- ✅ Plugin system functional
+- ✅ No breaking changes to API
+
+---
+
 ## [0.2.0-alpha.0] - 2026-08-21
 
 ### Added - Plugin System (Phase 2)
