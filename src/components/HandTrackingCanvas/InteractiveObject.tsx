@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { RigidBody, CuboidCollider, BallCollider, CylinderCollider } from '@react-three/rapier';
+import { RigidBody, CuboidCollider, BallCollider, CylinderCollider, CapsuleCollider } from '@react-three/rapier';
+import { Cylinder, Cone, Capsule } from '@react-three/drei';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
@@ -116,16 +117,48 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
       {type === 'box' && <CuboidCollider args={[0.5, 0.5, 0.5]} />}
       {type === 'sphere' && <BallCollider args={[0.5]} />}
       {type === 'torus' && <CylinderCollider args={[0.1, 0.5]} />}
+      {type === 'cylinder' && <CylinderCollider args={[0.5, 0.25]} />}
+      {type === 'cone' && <CylinderCollider args={[0.5, 0.25]} />}
+      {type === 'capsule' && <CapsuleCollider args={[0.5, 0.25]} />}
 
       <mesh scale={scale} castShadow>
         {type === 'box' && <boxGeometry args={[1, 1, 1]} />}
         {type === 'sphere' && <sphereGeometry args={[0.5, 32, 32]} />}
         {type === 'torus' && <torusGeometry args={[0.5, 0.2, 16, 32]} />}
-        <meshStandardMaterial
-          color={highlightColor}
-          emissive={highlightColor}
-          emissiveIntensity={emissiveIntensity}
-        />
+        {type === 'cylinder' && (
+          <Cylinder args={[0.25, 0.25, 1, 32]}>
+            <meshStandardMaterial
+              color={highlightColor}
+              emissive={highlightColor}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </Cylinder>
+        )}
+        {type === 'cone' && (
+          <Cone args={[0.25, 1, 32]}>
+            <meshStandardMaterial
+              color={highlightColor}
+              emissive={highlightColor}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </Cone>
+        )}
+        {type === 'capsule' && (
+          <Capsule args={[0.25, 0.5, 4, 16]}>
+            <meshStandardMaterial
+              color={highlightColor}
+              emissive={highlightColor}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </Capsule>
+        )}
+        {!['cylinder', 'cone', 'capsule'].includes(type) && (
+          <meshStandardMaterial
+            color={highlightColor}
+            emissive={highlightColor}
+            emissiveIntensity={emissiveIntensity}
+          />
+        )}
       </mesh>
     </RigidBody>
   );

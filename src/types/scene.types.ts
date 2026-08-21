@@ -1,6 +1,6 @@
 export interface SceneObject {
   id: string;
-  type: 'box' | 'sphere' | 'torus';
+  type: 'box' | 'sphere' | 'torus' | 'cylinder' | 'cone' | 'capsule';
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;

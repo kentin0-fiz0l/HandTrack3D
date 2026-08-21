@@ -5,6 +5,9 @@ interface SettingsStore {
   pinchThreshold: number; // 0.03 - 0.08 (lower = closer fingers needed)
   fingerExtensionAngle: number; // 140 - 175 (higher = more strict "open hand")
   fistCurlThreshold: number; // 0.10 - 0.20 (lower = tighter fist required)
+  pointExtensionAngle: number; // 140 - 175 (higher = stricter point detection)
+  swipeVelocityThreshold: number; // 0.3 - 1.0 (minimum velocity to trigger swipe)
+  swipeCooldown: number; // 300 - 1000ms (cooldown between swipes)
 
   // Physics Settings
   gravityEnabled: boolean; // Toggle physics on/off
@@ -20,10 +23,12 @@ interface SettingsStore {
   // Visual Settings
   showTrails: boolean; // Toggle visual trails on hand cursors
   showWebcam: boolean; // Toggle debug webcam preview
+  showHandSkeleton: boolean; // Toggle hand skeleton visualization
+  showPerformance: boolean; // Toggle performance monitoring dashboard
 
   // Actions
   reset: () => void;
-  updateGestureSetting: <K extends keyof Pick<SettingsStore, 'pinchThreshold' | 'fingerExtensionAngle' | 'fistCurlThreshold'>>(
+  updateGestureSetting: <K extends keyof Pick<SettingsStore, 'pinchThreshold' | 'fingerExtensionAngle' | 'fistCurlThreshold' | 'pointExtensionAngle' | 'swipeVelocityThreshold' | 'swipeCooldown'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -35,7 +40,7 @@ interface SettingsStore {
     key: K,
     value: SettingsStore[K]
   ) => void;
-  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam'>>(
+  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -47,6 +52,9 @@ const DEFAULT_SETTINGS = {
   pinchThreshold: 0.05,
   fingerExtensionAngle: 160,
   fistCurlThreshold: 0.15,
+  pointExtensionAngle: 160,
+  swipeVelocityThreshold: 0.5,
+  swipeCooldown: 500,
 
   // Physics
   gravityEnabled: true,
@@ -62,6 +70,8 @@ const DEFAULT_SETTINGS = {
   // Visual
   showTrails: true,
   showWebcam: false,
+  showHandSkeleton: true,
+  showPerformance: true,
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({

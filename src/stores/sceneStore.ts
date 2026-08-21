@@ -4,6 +4,9 @@ import type { SceneObject, GrabbedObject } from '@/types/scene.types';
 interface SceneStore {
   objects: SceneObject[];
   grabbedObjects: Map<string, GrabbedObject>; // Map handId -> GrabbedObject
+  addObject: (object: SceneObject) => void;
+  setObjects: (objects: SceneObject[]) => void;
+  clearObjects: () => void;
   grabObject: (handId: string, objectId: string, offset: [number, number, number]) => void;
   releaseObject: (handId: string) => void;
   updateObjectPosition: (id: string, position: [number, number, number]) => void;
@@ -38,6 +41,20 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
     },
   ],
   grabbedObjects: new Map(),
+  addObject: (object) =>
+    set((state) => ({
+      objects: [...state.objects, object],
+    })),
+  setObjects: (objects) =>
+    set({
+      objects,
+      grabbedObjects: new Map(), // Release all grabbed objects when scene changes
+    }),
+  clearObjects: () =>
+    set({
+      objects: [],
+      grabbedObjects: new Map(),
+    }),
   grabObject: (handId, objectId, offset) =>
     set((state) => {
       const newGrabbedObjects = new Map(state.grabbedObjects);

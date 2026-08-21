@@ -3,6 +3,8 @@ import { HandTrackingCanvas } from './components/HandTrackingCanvas/HandTracking
 import { WebcamFeed } from './components/WebcamFeed/WebcamFeed';
 import { ControlPanel } from './components/ControlPanel/ControlPanel';
 import { SettingsPanel } from './components/SettingsPanel/SettingsPanel';
+import { ObjectSpawner } from './components/ObjectSpawner/ObjectSpawner';
+import { PerformanceMonitor } from './components/PerformanceMonitor/PerformanceMonitor';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 function App() {
@@ -56,6 +58,12 @@ function App() {
 
       {/* Settings Panel */}
       <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+
+      {/* Object Spawner */}
+      <ObjectSpawner />
+
+      {/* Performance Monitor */}
+      <PerformanceMonitor />
 
       {/* 3D Canvas */}
       <HandTrackingCanvas />

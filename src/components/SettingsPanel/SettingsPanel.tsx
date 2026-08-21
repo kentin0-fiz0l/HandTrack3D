@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { SettingSlider } from '@/components/ui/SettingSlider';
 import { SettingToggle } from '@/components/ui/SettingToggle';
+import { SceneTemplates } from '@/components/SceneTemplates/SceneTemplates';
 import { updateMediaPipeOptions } from '@/services/mediapipeService';
 
 interface SettingsPanelProps {
@@ -9,10 +10,10 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
-type TabType = 'gestures' | 'physics' | 'tracking' | 'visual';
+type TabType = 'scene' | 'gestures' | 'physics' | 'tracking' | 'visual';
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('gestures');
+  const [activeTab, setActiveTab] = useState<TabType>('scene');
   const settings = useSettingsStore();
 
   // Handle ESC key to close
@@ -36,6 +37,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   if (!isOpen) return null;
 
   const tabs: { id: TabType; label: string }[] = [
+    { id: 'scene', label: 'Scene' },
     { id: 'gestures', label: 'Gestures' },
     { id: 'physics', label: 'Physics' },
     { id: 'tracking', label: 'Tracking' },
@@ -97,6 +99,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* Tab Content */}
           <div className="px-6 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            {/* Scene Tab */}
+            {activeTab === 'scene' && (
+              <div>
+                <SceneTemplates />
+              </div>
+            )}
+
             {/* Gestures Tab */}
             {activeTab === 'gestures' && (
               <div className="space-y-4">
@@ -129,6 +138,38 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               step={0.01}
               onChange={(value) => settings.updateGestureSetting('fistCurlThreshold', value)}
               description="Lower = tighter fist required"
+            />
+
+            <SettingSlider
+              label="Point Extension Angle"
+              value={settings.pointExtensionAngle}
+              min={140}
+              max={175}
+              step={5}
+              unit="°"
+              onChange={(value) => settings.updateGestureSetting('pointExtensionAngle', value)}
+              description="Higher = stricter point gesture detection"
+            />
+
+            <SettingSlider
+              label="Swipe Velocity Threshold"
+              value={settings.swipeVelocityThreshold}
+              min={0.3}
+              max={1.0}
+              step={0.1}
+              onChange={(value) => settings.updateGestureSetting('swipeVelocityThreshold', value)}
+              description="Minimum velocity to trigger swipe gesture"
+            />
+
+            <SettingSlider
+              label="Swipe Cooldown"
+              value={settings.swipeCooldown}
+              min={300}
+              max={1000}
+              step={50}
+              unit="ms"
+              onChange={(value) => settings.updateGestureSetting('swipeCooldown', value)}
+              description="Time between consecutive swipe detections"
             />
               </div>
             )}
@@ -218,6 +259,20 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               checked={settings.showTrails}
               onChange={(checked) => settings.updateVisualSetting('showTrails', checked)}
               description="Display visual trails on hand cursors"
+            />
+
+            <SettingToggle
+              label="Show Hand Skeleton"
+              checked={settings.showHandSkeleton}
+              onChange={(checked) => settings.updateVisualSetting('showHandSkeleton', checked)}
+              description="Visualize hand landmarks and bones in 3D"
+            />
+
+            <SettingToggle
+              label="Show Performance"
+              checked={settings.showPerformance}
+              onChange={(checked) => settings.updateVisualSetting('showPerformance', checked)}
+              description="Display performance metrics dashboard"
             />
 
             <SettingToggle

@@ -5,13 +5,21 @@ import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureRecognition } from '@/hooks/useGestureRecognition';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useHandTrackingStore } from '@/stores/handTrackingStore';
 import { HandMesh } from './HandMesh';
+import { HandSkeleton } from '@/components/HandSkeleton/HandSkeleton';
 import { InteractiveObject } from './InteractiveObject';
+import { PerformanceTracker } from '@/components/PerformanceMonitor/PerformanceTracker';
+import { mapHandTo3D } from '@/utils/coordinateMapping';
+import { useThree } from '@react-three/fiber';
+import { useMemo } from 'react';
 
 export function Scene3D() {
   const objects = useSceneStore((state) => state.objects);
   const cursors = useHandCursorStore((state) => state.cursors);
   const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
+  const hands = useHandTrackingStore((state) => state.hands);
+  const { camera, size } = useThree();
 
   // Map hand positions to 3D space
   useHandTo3DMapping();
@@ -19,8 +27,22 @@ export function Scene3D() {
   // Detect gestures
   useGestureRecognition();
 
+  // Map all hand landmarks to 3D space for skeleton visualization
+  const handSkeletons = useMemo(() => {
+    return hands.map((hand) => ({
+      id: hand.id,
+      handedness: hand.handedness,
+      landmarks: hand.landmarks.map((lm) =>
+        mapHandTo3D(lm, camera, size.width, size.height)
+      ),
+    }));
+  }, [hands, camera, size.width, size.height]);
+
   return (
     <>
+      {/* Performance tracking */}
+      <PerformanceTracker />
+
       {/* Camera controls - disabled rotation for first-person view */}
       <OrbitControls
         makeDefault
@@ -69,6 +91,15 @@ export function Scene3D() {
           handId={cursor.id}
           position={cursor.position}
           handedness={cursor.handedness}
+        />
+      ))}
+
+      {/* Hand skeletons */}
+      {handSkeletons.map((skeleton) => (
+        <HandSkeleton
+          key={`skeleton-${skeleton.id}`}
+          landmarks={skeleton.landmarks}
+          handedness={skeleton.handedness}
         />
       ))}
     </>

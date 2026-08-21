@@ -109,12 +109,82 @@ export function detectFist(landmarks: HandLandmark[]): boolean {
 }
 
 /**
+ * Check if finger is extended based on joint angles with custom threshold
+ */
+function isFingerExtendedWithThreshold(
+  landmarks: HandLandmark[],
+  fingerIndices: number[],
+  threshold: number
+): boolean {
+  // Check angles at each joint
+  const angles = [];
+  for (let i = 0; i < fingerIndices.length - 2; i++) {
+    const angle = calculateAngle(
+      landmarks[fingerIndices[i]],
+      landmarks[fingerIndices[i + 1]],
+      landmarks[fingerIndices[i + 2]]
+    );
+    angles.push(angle);
+  }
+
+  // Finger is extended if all joint angles are > threshold
+  return angles.every((angle) => angle > threshold);
+}
+
+/**
+ * Detect point gesture (index finger extended, others curled)
+ */
+export function detectPoint(landmarks: HandLandmark[]): boolean {
+  const settings = getSettings();
+
+  // Check index finger is extended using point-specific threshold
+  const indexExtended = isFingerExtendedWithThreshold(
+    landmarks,
+    [5, 6, 7, 8],
+    settings.pointExtensionAngle
+  );
+
+  if (!indexExtended) {
+    return false;
+  }
+
+  // Check other fingers are curled (not extended)
+  const middleCurled = !isFingerExtendedWithThreshold(
+    landmarks,
+    [9, 10, 11, 12],
+    settings.pointExtensionAngle
+  );
+  const ringCurled = !isFingerExtendedWithThreshold(
+    landmarks,
+    [13, 14, 15, 16],
+    settings.pointExtensionAngle
+  );
+  const pinkyCurled = !isFingerExtendedWithThreshold(
+    landmarks,
+    [17, 18, 19, 20],
+    settings.pointExtensionAngle
+  );
+
+  // Check thumb is not extended (to distinguish from "L" shape)
+  const thumbCurled = !isFingerExtendedWithThreshold(
+    landmarks,
+    [1, 2, 3, 4],
+    settings.pointExtensionAngle
+  );
+
+  return middleCurled && ringCurled && pinkyCurled && thumbCurled;
+}
+
+/**
  * Detect gesture from hand landmarks
  */
 export function detectGesture(landmarks: HandLandmark[]): GestureType {
   // Check gestures in priority order
   if (detectPinch(landmarks)) {
     return 'pinch';
+  }
+  if (detectPoint(landmarks)) {
+    return 'point';
   }
   if (detectFist(landmarks)) {
     return 'fist';
