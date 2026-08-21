@@ -4,14 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "coverage": "vitest run --coverage"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:run": "turbo run test:run",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
@@ -23,6 +25,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.5",
@@ -38,9 +41,12 @@
     "jsdom": "^30.0.1",
     "oxlint": "^1.75.0",
     "postcss": "^8.5.26",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.4.19",
+    "turbo": "^2.3.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.11"
-  }
+  },
+  "packageManager": "pnpm@11.22.0"
 }

@@ -1,0 +1,82 @@
+{
+  "name": "@handtrack3d/rapier",
+  "version": "0.1.0-alpha.0",
+  "description": "Rapier physics adapter for hand tracking with React Three Fiber",
+  "keywords": [
+    "rapier",
+    "physics",
+    "react-three-rapier",
+    "hand-tracking",
+    "3d",
+    "webgl"
+  ],
+  "author": "Kentino",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentino/handtrack3d.git",
+    "directory": "packages/rapier"
+  },
+  "homepage": "https://github.com/kentino/handtrack3d/tree/main/packages/rapier#readme",
+  "bugs": {
+    "url": "https://github.com/kentino/handtrack3d/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @react-three/rapier --external react --external react-dom --external three",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external @react-three/rapier --external react --external react-dom --external three",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint",
+    "prepublishOnly": "pnpm run build && pnpm run test"
+  },
+  "dependencies": {
+    "@handtrack3d/core": "workspace:*",
+    "@handtrack3d/react": "workspace:*",
+    "@handtrack3d/three": "workspace:*"
+  },
+  "peerDependencies": {
+    "@react-three/rapier": "^1.0.0 || ^2.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "three": ">=0.160.0"
+  },
+  "devDependencies": {
+    "@react-three/rapier": "^2.2.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "^0.185.4",
+    "@vitejs/plugin-react": "^6.0.4",
+    "happy-dom": "^20.11.6",
+    "oxlint": "^1.75.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "0.180.0",
+    "tsup": "^8.0.0",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

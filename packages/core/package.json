@@ -1,0 +1,65 @@
+{
+  "name": "@handtrack3d/core",
+  "version": "0.1.0-alpha.0",
+  "description": "Framework-agnostic hand tracking library powered by MediaPipe",
+  "keywords": [
+    "hand-tracking",
+    "mediapipe",
+    "gestures",
+    "webgl",
+    "computer-vision",
+    "hand-detection",
+    "gesture-recognition"
+  ],
+  "author": "Kentino",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentino/handtrack3d.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/kentino/handtrack3d/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/kentino/handtrack3d/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint",
+    "prepublishOnly": "pnpm run build && pnpm run test"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "oxlint": "^1.75.0",
+    "tsup": "^8.0.0",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
