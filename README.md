@@ -2,16 +2,20 @@
 
 <div align="center">
 
-![HandTrack3D](https://img.shields.io/badge/HandTrack3D-v1.0.0-blue)
+[![npm version](https://img.shields.io/npm/v/@handtrack3d/core?label=core)](https://www.npmjs.com/package/@handtrack3d/core)
+[![npm version](https://img.shields.io/npm/v/@handtrack3d/react?label=react)](https://www.npmjs.com/package/@handtrack3d/react)
+[![npm version](https://img.shields.io/npm/v/@handtrack3d/three?label=three)](https://www.npmjs.com/package/@handtrack3d/three)
+[![npm version](https://img.shields.io/npm/v/@handtrack3d/rapier?label=rapier)](https://www.npmjs.com/package/@handtrack3d/rapier)
+
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Three.js](https://img.shields.io/badge/Three.js-0.180-000000?logo=three.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)
+![TypeScript](https://img.shields.io/badge/TypeScript-6+-3178C6?logo=typescript)
 
-**Webcam-Based 3D Hand Interaction Prototype**
+**Extensible Plugin Platform for 3D Hand Interaction**
 
-A web application that uses computer vision to interact with 3D objects through hand gestures and movements.
+A modular SDK and showcase app that enables custom gesture detection, 3D interactions, and physics engine integration through a powerful plugin system.
 
-[Quick Start](#quick-start) • [Features](#features) • [Usage](#usage) • [Architecture](#architecture)
+[Quick Start](#quick-start) • [SDK Packages](#sdk-packages) • [Plugin System](#plugin-system) • [Features](#features) • [Usage](#usage)
 
 </div>
 
@@ -19,22 +23,110 @@ A web application that uses computer vision to interact with 3D objects through 
 
 ## Overview
 
-HandTrack3D demonstrates natural user interfaces for 3D environments using webcam-based hand tracking. Built with MediaPipe Hands and Three.js, it enables real-time hand gesture recognition and 3D object manipulation directly in the browser.
+HandTrack3D is both a **modular SDK** and **showcase application** for building natural user interfaces in 3D environments. The SDK provides an extensible plugin platform for custom gesture detection, 3D interactions, and physics engine integration, while the showcase app demonstrates these capabilities in action.
 
 ### Key Features
 
+#### SDK Features
+- 🔌 **Plugin System** - Custom gestures, interactions, and physics adapters
+- 📦 **Modular Packages** - Core, React, Three.js, and Rapier integrations
+- 🎯 **Priority-Based Detection** - Configure gesture matching order (0-100 scale)
+- ⚙️ **Physics Abstraction** - Engine-agnostic physics with adapters (Rapier, Cannon.js)
+- 🔧 **Framework Agnostic** - Use with any JavaScript framework or vanilla JS
+- 📘 **TypeScript First** - Full type safety with comprehensive definitions
+- 🧪 **Well Tested** - 40+ unit tests, integration tests, 90%+ coverage
+
+#### Showcase App Features
 - ✋ **Real-time hand tracking** (30fps) with MediaPipe Hands
 - 🎯 **3D cursor mapping** from 2D hand landmarks to 3D space
-- 👌 **Gesture recognition** (pinch, open hand, fist)
-- 🎮 **Object interaction** (grab, drag, release)
+- 👌 **Gesture recognition** (pinch, open hand, fist, point)
+- 🎮 **Object interaction** (grab, drag, release, throw)
 - 🖐️ **Multi-hand support** (up to 2 hands simultaneously)
-- ⚙️ **Physics simulation** (gravity, collisions, throwing)
+- ⚙️ **Physics simulation** (gravity, collisions, realistic motion)
 - 🎨 **Visual feedback** with color-coded cursors and trails
 - 📊 **Real-time stats** (FPS, hand count, gestures)
 
 ---
 
+## SDK Packages
+
+HandTrack3D is available as a set of npm packages for building your own hand tracking applications:
+
+### Installation
+
+```bash
+# Install all packages
+npm install @handtrack3d/core@alpha
+npm install @handtrack3d/react@alpha
+npm install @handtrack3d/three@alpha
+npm install @handtrack3d/rapier@alpha
+```
+
+### Available Packages
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| **@handtrack3d/core** | Framework-agnostic hand tracking and gesture detection | ![npm](https://img.shields.io/npm/v/@handtrack3d/core) |
+| **@handtrack3d/react** | React hooks and components | ![npm](https://img.shields.io/npm/v/@handtrack3d/react) |
+| **@handtrack3d/three** | Three.js integration and 3D interactions | ![npm](https://img.shields.io/npm/v/@handtrack3d/three) |
+| **@handtrack3d/rapier** | Rapier physics adapter and grab plugin | ![npm](https://img.shields.io/npm/v/@handtrack3d/rapier) |
+
+---
+
+## Plugin System
+
+HandTrack3D's plugin architecture allows you to extend functionality without modifying core code.
+
+### Creating a Custom Gesture
+
+```typescript
+import { GestureDetector, GesturePlugin } from '@handtrack3d/core';
+
+class ThumbsUpPlugin implements GesturePlugin {
+  readonly name = 'custom:thumbs-up';
+  readonly priority = 70;
+  readonly gestureType = 'thumbs-up';
+
+  detect(landmarks, settings) {
+    const thumbUp = landmarks[4].y < landmarks[2].y;
+    const fingersCurled = /* check other fingers */;
+    return thumbUp && fingersCurled;
+  }
+}
+
+const detector = new GestureDetector();
+detector.registerGesture(new ThumbsUpPlugin());
+const gesture = detector.detectGesture(landmarks); // Can detect 'thumbs-up'
+```
+
+### Using Physics Abstraction
+
+```typescript
+import { GrabPlugin, RapierAdapter } from '@handtrack3d/rapier';
+
+const adapter = new RapierAdapter();
+const grabPlugin = new GrabPlugin(adapter, {
+  grabRadius: 0.5,
+  throwVelocityScale: 60,
+});
+
+// In render loop
+grabPlugin.update(hand, rigidBodies);
+```
+
+### Plugin Types
+
+1. **GesturePlugin** - Custom gesture detection with priority-based matching
+2. **InteractionPlugin** - 3D interaction behaviors (point-select, custom controls)
+3. **PhysicsAdapter** - Physics engine abstraction (Rapier, Cannon.js, Ammo.js)
+
+See [examples/](examples/) for complete tutorials on building custom plugins.
+
+---
+
 ## Quick Start
+
+### Running the Showcase App
 
 ### Prerequisites
 
@@ -163,7 +255,37 @@ useGestureStore    useHandCursorStore
 
 ```
 HandTrack3D/
-├── src/
+├── packages/                      # SDK packages
+│   ├── core/                      # @handtrack3d/core
+│   │   ├── src/
+│   │   │   ├── plugins/           # Plugin system
+│   │   │   │   ├── types.ts       # Plugin interfaces
+│   │   │   │   └── registry.ts    # Plugin registry
+│   │   │   ├── gestures/          # Gesture detection
+│   │   │   │   ├── detector.ts    # GestureDetector class
+│   │   │   │   └── plugins/       # Built-in gesture plugins
+│   │   │   ├── tracking/          # MediaPipe integration
+│   │   │   ├── utils/             # Coordinate mapping
+│   │   │   └── types/             # TypeScript definitions
+│   │   └── package.json
+│   ├── react/                     # @handtrack3d/react
+│   │   ├── src/
+│   │   │   ├── hooks/             # React hooks
+│   │   │   └── components/        # React components
+│   │   └── package.json
+│   ├── three/                     # @handtrack3d/three
+│   │   ├── src/
+│   │   │   ├── interactions/      # 3D interaction plugins
+│   │   │   └── utils/             # Three.js utilities
+│   │   └── package.json
+│   └── rapier/                    # @handtrack3d/rapier
+│       ├── src/
+│       │   ├── adapters/          # Physics adapters
+│       │   ├── interactions/      # Grab plugin
+│       │   ├── hooks/             # React physics hooks
+│       │   └── utils/             # Physics utilities
+│       └── package.json
+├── src/                           # Showcase app
 │   ├── components/
 │   │   ├── HandTrackingCanvas/    # 3D scene and rendering
 │   │   │   ├── HandTrackingCanvas.tsx
@@ -180,20 +302,15 @@ HandTrack3D/
 │   │   ├── useHandTo3DMapping.ts  # 2D→3D coordinate mapping
 │   │   ├── useGestureRecognition.ts
 │   │   └── useKeyboardShortcuts.ts
-│   ├── services/
-│   │   ├── mediapipeService.ts    # MediaPipe initialization
-│   │   └── gestureDetector.ts     # Gesture algorithms
 │   ├── stores/
 │   │   ├── handTrackingStore.ts
-│   │   ├── sceneStore.ts
-│   │   └── (gesture/cursor stores in hooks)
-│   ├── utils/
-│   │   ├── coordinateMapping.ts   # 2D→3D math
-│   │   └── collisionDetection.ts  # Proximity detection
-│   └── types/
-│       ├── hand.types.ts
-│       ├── scene.types.ts
-│       └── gesture.types.ts
+│   │   └── sceneStore.ts
+│   └── utils/
+│       └── collisionDetection.ts  # Proximity detection
+├── examples/                      # Plugin tutorials
+│   ├── custom-gesture-plugin.md
+│   ├── custom-interaction-plugin.md
+│   └── custom-physics-adapter.md
 └── public/                        # Static assets
 ```
 
@@ -301,6 +418,27 @@ pnpm preview      # Preview production build
 
 ### Adding New Gestures
 
+**Using the Plugin System (Recommended)**:
+
+```typescript
+import { GesturePlugin } from '@handtrack3d/core';
+
+class MyCustomGesture implements GesturePlugin {
+  readonly name = 'custom:my-gesture';
+  readonly priority = 50;
+  readonly gestureType = 'my-gesture';
+
+  detect(landmarks, settings) {
+    // Your detection logic
+    return /* boolean */;
+  }
+}
+
+// Register with detector
+detector.registerGesture(new MyCustomGesture());
+```
+
+**Direct Modification (Legacy)**:
 1. Add gesture type to `src/types/gesture.types.ts`
 2. Implement detection in `src/services/gestureDetector.ts`
 3. Add visual feedback in `src/components/HandTrackingCanvas/HandMesh.tsx`
@@ -313,16 +451,50 @@ pnpm preview      # Preview production build
 
 ---
 
-## Future Enhancements
+## Roadmap
 
-- [ ] Physics simulation (gravity, collisions)
-- [ ] More gestures (swipe, rotate, scale)
+### Completed (v0.2.0-alpha.0)
+- ✅ Plugin system architecture
+- ✅ Physics simulation (gravity, collisions, throwing)
+- ✅ Rapier physics adapter
+- ✅ Custom gesture plugins (GesturePlugin interface)
+- ✅ Custom interaction plugins (InteractionPlugin interface)
+- ✅ Physics abstraction (PhysicsAdapter interface)
+- ✅ Multi-hand support (up to 2 hands)
+- ✅ npm packages published
+
+### Planned (v0.3.0+)
+- [ ] Plugin marketplace / discovery
+- [ ] Additional physics adapters (Cannon.js, Ammo.js official support)
+- [ ] More gesture plugins (swipe, rotate, pinch-to-zoom, two-hand gestures)
+- [ ] Performance profiling tools
+- [ ] Plugin debugging utilities
+- [ ] Settings panel UI (sensitivity, detection thresholds)
 - [ ] Custom object creation UI
 - [ ] Multi-user collaboration
 - [ ] VR/AR integration
 - [ ] Gesture recording and playback
-- [ ] Settings panel (sensitivity, detection thresholds)
-- [ ] Example scenes (playground, tutorial)
+- [ ] Example scenes (playground, tutorials)
+
+---
+
+## Links
+
+### Repository
+- **GitHub**: [kentin0-fiz0l/HandTrack3D](https://github.com/kentin0-fiz0l/HandTrack3D)
+- **Issues**: [Report a bug or request a feature](https://github.com/kentin0-fiz0l/HandTrack3D/issues)
+- **Releases**: [View releases](https://github.com/kentin0-fiz0l/HandTrack3D/releases)
+
+### npm Packages
+- [@handtrack3d/core](https://www.npmjs.com/package/@handtrack3d/core) - Core hand tracking and gesture detection
+- [@handtrack3d/react](https://www.npmjs.com/package/@handtrack3d/react) - React hooks and components
+- [@handtrack3d/three](https://www.npmjs.com/package/@handtrack3d/three) - Three.js integration
+- [@handtrack3d/rapier](https://www.npmjs.com/package/@handtrack3d/rapier) - Rapier physics adapter
+
+### Documentation
+- [Plugin System Guide](examples/custom-gesture-plugin.md)
+- [CHANGELOG](CHANGELOG.md)
+- [Release Notes v0.2.0-alpha.0](RELEASE_NOTES_v0.2.0-alpha.0.md)
 
 ---
 
@@ -334,15 +506,16 @@ MIT License - See LICENSE file for details.
 
 ## Acknowledgments
 
-- **MediaPipe** by Google for hand tracking
+- **MediaPipe** by Google for hand tracking ML models
 - **Three.js** community for 3D rendering
-- **React Three Fiber** for React integration
-- Built as part of the **HandTrack3D** exploration project
+- **React Three Fiber** for declarative Three.js
+- **Rapier** for high-performance physics simulation
+- Built with **Claude Opus 4.6** assistance
 
 ---
 
 <div align="center">
 
-**Built with ❤️ using React, Three.js, and MediaPipe**
+**v0.2.0-alpha.0** • Plugin System Complete • **Built with ❤️ using TypeScript, React, Three.js, and MediaPipe**
 
 </div>
