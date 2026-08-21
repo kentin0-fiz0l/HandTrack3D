@@ -31,7 +31,12 @@ export {
   OpenHandGesturePlugin,
   FistGesturePlugin,
   PointGesturePlugin,
+  SwipeLeftGesturePlugin,
+  SwipeRightGesturePlugin,
+  SwipeUpGesturePlugin,
+  SwipeDownGesturePlugin,
 } from './gestures/plugins';
+export type { SwipeGestureOptions } from './gestures/plugins';
 
 // Coordinate mapping utilities
 export {

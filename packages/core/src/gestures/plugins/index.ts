@@ -6,12 +6,30 @@
  * - Point (index finger extended, others curled)
  * - Fist (all fingers curled)
  * - Open hand (all fingers extended)
+ * - Swipe (directional hand movement)
  */
 
 export { PinchGesturePlugin } from './pinch';
 export { OpenHandGesturePlugin } from './open-hand';
 export { FistGesturePlugin } from './fist';
 export { PointGesturePlugin } from './point';
+
+/**
+ * Swipe gesture plugins
+ *
+ * Velocity-based directional swipe detection:
+ * - Swipe Left
+ * - Swipe Right
+ * - Swipe Up
+ * - Swipe Down
+ */
+export {
+  SwipeLeftGesturePlugin,
+  SwipeRightGesturePlugin,
+  SwipeUpGesturePlugin,
+  SwipeDownGesturePlugin,
+  type SwipeGestureOptions,
+} from './swipe';
 
 /**
  * Example gesture plugins
