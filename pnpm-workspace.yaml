@@ -5,3 +5,8 @@ packages:
 
 allowBuilds:
   esbuild: true
+
+minimumReleaseAgeExclude:
+  - '@handtrack3d/core@0.2.0-alpha.0'
+  - '@handtrack3d/react@0.2.0-alpha.1'
+  - '@handtrack3d/three@0.2.0-alpha.1'

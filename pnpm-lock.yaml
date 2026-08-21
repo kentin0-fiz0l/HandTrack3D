@@ -131,14 +131,14 @@ importers:
   packages/rapier:
     dependencies:
       '@handtrack3d/core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.2.0-alpha.0
+        version: 0.2.0-alpha.0
       '@handtrack3d/react':
-        specifier: workspace:*
-        version: link:../react
+        specifier: ^0.2.0-alpha.1
+        version: 0.2.0-alpha.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@handtrack3d/three':
-        specifier: workspace:*
-        version: link:../three
+        specifier: ^0.2.0-alpha.1
+        version: 0.2.0-alpha.1(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.180.0))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.180.0)
     devDependencies:
       '@react-three/rapier':
         specifier: ^2.2.0
@@ -189,8 +189,8 @@ importers:
   packages/react:
     dependencies:
       '@handtrack3d/core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.2.0-alpha.0
+        version: 0.2.0-alpha.0
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2
@@ -235,11 +235,11 @@ importers:
   packages/three:
     dependencies:
       '@handtrack3d/core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.2.0-alpha.0
+        version: 0.2.0-alpha.0
       '@handtrack3d/react':
-        specifier: workspace:*
-        version: link:../react
+        specifier: ^0.2.0-alpha.1
+        version: 0.2.0-alpha.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
       '@react-three/fiber':
         specifier: ^9.7.0
@@ -835,6 +835,26 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@handtrack3d/core@0.2.0-alpha.0':
+    resolution: {integrity: sha512-LnyNADlZh867Xqpn9m2QpVPW/qUuRx9mES+5S/g68z3G6m20AkJsvRc+sUnseSY9QL4I+d7tx8OZG2KGRZYwQA==}
+    engines: {node: '>=18.0.0'}
+
+  '@handtrack3d/react@0.2.0-alpha.1':
+    resolution: {integrity: sha512-Ad4uqeNFeNRnsFs0P37fZz+4YqS0GAwyQ6zP2yPXhH8NB1xaKsqsuMEr0FXXE/1A/spA307AMu7QVJecQHQWMQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
+  '@handtrack3d/three@0.2.0-alpha.1':
+    resolution: {integrity: sha512-ELtlEDdL0/wwBhnE/imSEnUUErgYAO6aOnpQiKNWGZv2z8qGhMqF/YAwwcDzwoHOVyYJJIiQdp13+Kli3EY8Jw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@react-three/fiber': ^8.0.0 || ^9.0.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+      three: '>=0.160.0'
 
   '@iconify-json/simple-icons@1.2.93':
     resolution: {integrity: sha512-/XhANjfGYOuqvSR3TmUnkQkINvQ4GVjVuukvymRbxtVFBvIq/yiXJqCDycKcQPT401OYT9H2vIY6ihAlz1QIAw==}
@@ -3683,6 +3703,25 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.1': {}
+
+  '@handtrack3d/core@0.2.0-alpha.0':
+    dependencies:
+      '@mediapipe/tasks-vision': 0.10.17
+
+  '@handtrack3d/react@0.2.0-alpha.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@handtrack3d/core': 0.2.0-alpha.0
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  '@handtrack3d/three@0.2.0-alpha.1(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.180.0))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.180.0)':
+    dependencies:
+      '@handtrack3d/core': 0.2.0-alpha.0
+      '@handtrack3d/react': 0.2.0-alpha.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@react-three/fiber': 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.180.0)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      three: 0.180.0
 
   '@iconify-json/simple-icons@1.2.93':
     dependencies:

@@ -3,7 +3,7 @@
  * Rapier physics adapter for hand tracking
  */
 
-export const version = '0.2.0-alpha.0';
+export const version = '0.2.0-alpha.2';
 
 // Physics adapters
 export type { PhysicsAdapter } from './adapters';

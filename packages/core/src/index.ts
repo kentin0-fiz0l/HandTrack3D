@@ -5,7 +5,7 @@
  * Can be used with any JavaScript framework or vanilla JS.
  */
 
-export const version = '0.2.0-alpha.0';
+export const version = '0.2.0-alpha.2';
 
 // Main hand tracking class
 export { HandTracker, DEFAULT_MEDIAPIPE_CONFIG } from './tracking/mediapipe';

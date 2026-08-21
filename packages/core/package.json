@@ -1,6 +1,6 @@
 {
   "name": "@handtrack3d/core",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.2",
   "description": "Framework-agnostic hand tracking library powered by MediaPipe",
   "keywords": [
     "hand-tracking",
