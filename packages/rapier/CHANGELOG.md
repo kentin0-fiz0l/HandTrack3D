@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-alpha.2] - 2026-08-21
+
+### Added
+
+#### Example Physics Adapters
+- `CannonAdapter` - Complete Cannon.js physics adapter implementation
+  - Implements `PhysicsAdapter<CannonBody>` interface
+  - Body type management (Dynamic, Kinematic, Static)
+  - Velocity and position control
+  - Impulse application
+  - Validates PhysicsAdapter abstraction with second engine
+
+#### Documentation
+- `examples/cannon-physics-adapter.md` (480 lines)
+  - Complete migration guide from Rapier to Cannon.js
+  - React Three Fiber integration examples
+  - Advanced usage: shapes, materials, constraints, collision events
+  - Performance optimization techniques
+  - Troubleshooting guide
+  - Comparison table: Cannon.js vs Rapier
+
+#### Testing
+- 25 comprehensive tests for CannonAdapter
+- Mock CannonBody implementation for isolated testing
+- Full coverage of PhysicsAdapter interface
+- Integration test with GrabPlugin
+
+### Changed
+- Package version bumped to 0.2.0-alpha.2
+- Updated dependencies to match core package version
+- Enhanced exports with example adapters
+
+### Backward Compatibility
+- ✅ All v0.2.0-alpha.0 features unchanged
+- ✅ RapierAdapter still works identically
+- ✅ No breaking changes
+- ✅ Example adapters are opt-in
+
+### Notes
+- CannonAdapter demonstrates that PhysicsAdapter abstraction works with multiple engines
+- Users can now choose between Rapier (performance) and Cannon.js (bundle size)
+- Future releases may include dedicated `@handtrack3d/cannon` package
+
 ## [0.2.0-alpha.0] - 2026-08-21
 
 ### Added
