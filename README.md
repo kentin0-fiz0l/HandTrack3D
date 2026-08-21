@@ -28,6 +28,7 @@ HandTrack3D demonstrates natural user interfaces for 3D environments using webca
 - 👌 **Gesture recognition** (pinch, open hand, fist)
 - 🎮 **Object interaction** (grab, drag, release)
 - 🖐️ **Multi-hand support** (up to 2 hands simultaneously)
+- ⚙️ **Physics simulation** (gravity, collisions, throwing)
 - 🎨 **Visual feedback** with color-coded cursors and trails
 - 📊 **Real-time stats** (FPS, hand count, gestures)
 
@@ -61,6 +62,15 @@ Navigate to **http://localhost:5173** and allow webcam access.
 2. **Pinch** (touch thumb and index finger) near an object to grab it
 3. **Move your hand** to drag the object in 3D space
 4. **Open your hand** (spread all fingers) to release
+5. **Drop or throw** - released objects fall with gravity and can be thrown with velocity
+
+### Physics Features
+
+- **Gravity** (9.81 m/s²) - Objects fall naturally when released
+- **Collisions** - Objects bounce off each other and the ground (0.5 restitution)
+- **Throwing** - Release objects while moving to launch them with velocity
+- **Ground plane** - Invisible floor prevents objects from falling forever
+- **Realistic motion** - Damping and friction create natural movement
 
 ### Keyboard Shortcuts
 
@@ -96,8 +106,9 @@ Navigate to **http://localhost:5173** and allow webcam access.
 - **TypeScript 6** - Type safety
 - **Vite 8** - Build tool and dev server
 - **Three.js 0.180** - 3D rendering engine
-- **React Three Fiber 8.18** - React renderer for Three.js
+- **React Three Fiber 9.7** - React renderer for Three.js
 - **@react-three/drei** - Three.js helpers and components
+- **@react-three/rapier** - Physics engine integration
 
 ### Computer Vision
 
