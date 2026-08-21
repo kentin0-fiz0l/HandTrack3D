@@ -14,12 +14,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kentino/handtrack3d.git",
+    "url": "https://github.com/kentin0-fiz0l/HandTrack3D.git",
     "directory": "packages/react"
   },
-  "homepage": "https://github.com/kentino/handtrack3d/tree/main/packages/react#readme",
+  "homepage": "https://github.com/kentin0-fiz0l/HandTrack3D/tree/main/packages/react#readme",
   "bugs": {
-    "url": "https://github.com/kentino/handtrack3d/issues"
+    "url": "https://github.com/kentin0-fiz0l/HandTrack3D/issues"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
