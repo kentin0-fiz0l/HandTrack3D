@@ -7,31 +7,17 @@ interface PoseSkeletonOverlayProps {
   show: boolean;
 }
 
-// MoveNet skeleton connections (COCO format)
+// MoveNet skeleton connections (OPTIMIZED: Only arm connections)
+// We only store 6 keypoints (shoulders, elbows, wrists) to reduce memory by 65%
 const POSE_CONNECTIONS = [
-  // Face
-  [PoseLandmarks.NOSE, PoseLandmarks.LEFT_EYE],
-  [PoseLandmarks.NOSE, PoseLandmarks.RIGHT_EYE],
-  [PoseLandmarks.LEFT_EYE, PoseLandmarks.LEFT_EAR],
-  [PoseLandmarks.RIGHT_EYE, PoseLandmarks.RIGHT_EAR],
-
-  // Torso
+  // Shoulder connection (to show body orientation)
   [PoseLandmarks.LEFT_SHOULDER, PoseLandmarks.RIGHT_SHOULDER],
-  [PoseLandmarks.LEFT_SHOULDER, PoseLandmarks.LEFT_HIP],
-  [PoseLandmarks.RIGHT_SHOULDER, PoseLandmarks.RIGHT_HIP],
-  [PoseLandmarks.LEFT_HIP, PoseLandmarks.RIGHT_HIP],
 
   // Arms (IMPORTANT for depth tracking)
   [PoseLandmarks.LEFT_SHOULDER, PoseLandmarks.LEFT_ELBOW],
   [PoseLandmarks.LEFT_ELBOW, PoseLandmarks.LEFT_WRIST],
   [PoseLandmarks.RIGHT_SHOULDER, PoseLandmarks.RIGHT_ELBOW],
   [PoseLandmarks.RIGHT_ELBOW, PoseLandmarks.RIGHT_WRIST],
-
-  // Legs
-  [PoseLandmarks.LEFT_HIP, PoseLandmarks.LEFT_KNEE],
-  [PoseLandmarks.LEFT_KNEE, PoseLandmarks.LEFT_ANKLE],
-  [PoseLandmarks.RIGHT_HIP, PoseLandmarks.RIGHT_KNEE],
-  [PoseLandmarks.RIGHT_KNEE, PoseLandmarks.RIGHT_ANKLE],
 ];
 
 export function PoseSkeletonOverlay({ videoWidth, videoHeight, show }: PoseSkeletonOverlayProps) {
@@ -88,9 +74,9 @@ export function PoseSkeletonOverlay({ videoWidth, videoHeight, show }: PoseSkele
       }
     });
 
-    // Draw keypoints
+    // Draw keypoints (only the 6 arm keypoints we're storing)
     landmarks.forEach((landmark, idx) => {
-      if (landmark.visibility < 0.3) return; // Skip low-confidence points
+      if (!landmark || landmark.visibility < 0.3) return; // Skip undefined or low-confidence points
 
       const x = landmark.x * videoWidth;
       const y = landmark.y * videoHeight;

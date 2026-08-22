@@ -52,25 +52,41 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
         setIsReady(true);
         console.log('[MoveNet] Pose detector initialized successfully');
 
-        // Start detection loop
+        // Start detection loop with FPS decoupling
+        let frameCount = 0;
+        const POSE_FRAME_SKIP = 3; // Run every 3rd frame (30 FPS → 10 FPS)
+
         const detect = async () => {
           if (!isActive || !detectorRef.current || !videoElement) return;
 
+          frameCount++;
+
           try {
-            if (videoElement.readyState >= 2) {
+            // Only run pose estimation every POSE_FRAME_SKIP frames
+            // This reduces CPU usage while maintaining smooth hand tracking
+            if (frameCount % POSE_FRAME_SKIP === 0 && videoElement.readyState >= 2) {
               const poses = await detectorRef.current.estimatePoses(videoElement);
 
               if (poses.length > 0 && poses[0].keypoints) {
                 const pose = poses[0];
 
-                // Convert MoveNet keypoints to our format
-                // MoveNet provides 17 keypoints, map to MediaPipe-like format
-                const landmarks = pose.keypoints.map((kp) => ({
-                  x: kp.x / videoElement.videoWidth,  // Normalize to 0-1
-                  y: kp.y / videoElement.videoHeight, // Normalize to 0-1
-                  z: 0, // MoveNet doesn't provide Z, we'll use 0
-                  visibility: kp.score,
-                }));
+                // MEMORY OPTIMIZATION: Only store the 6 keypoints needed for arm tracking
+                // This reduces memory by 65% and speeds up state updates
+                const armKeypoints = [5, 6, 7, 8, 9, 10]; // Shoulders, elbows, wrists
+
+                // Create sparse array with only arm keypoints
+                // This maintains original indices for coordinateMapping.ts compatibility
+                const landmarks: any[] = new Array(17);
+                pose.keypoints.forEach((kp, index) => {
+                  if (armKeypoints.includes(index)) {
+                    landmarks[index] = {
+                      x: kp.x / videoElement.videoWidth,  // Normalize to 0-1
+                      y: kp.y / videoElement.videoHeight, // Normalize to 0-1
+                      z: 0, // MoveNet doesn't provide Z, we'll use 0
+                      visibility: kp.score,
+                    };
+                  }
+                });
 
                 setPose({
                   landmarks,
@@ -82,6 +98,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
                 setIsTracking(false);
               }
             }
+            // On skipped frames, previous pose state is automatically reused
           } catch (error) {
             console.warn('[MoveNet] Detection error:', error);
           }
