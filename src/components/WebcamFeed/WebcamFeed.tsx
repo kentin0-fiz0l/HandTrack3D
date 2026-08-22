@@ -4,6 +4,7 @@ import { useMoveNetTracking } from '@/hooks/useMoveNetTracking';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { HandOverlay } from './HandOverlay';
 import { PoseSkeletonOverlay } from './PoseSkeletonOverlay';
+import { WebcamErrorDisplay } from '@/components/ErrorDisplay/WebcamErrorDisplay';
 
 interface WebcamFeedProps {
   showPreview?: boolean;
@@ -24,12 +25,7 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   useMoveNetTracking(videoRef.current);
 
   if (error) {
-    return (
-      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg max-w-xs z-50">
-        <h3 className="font-semibold mb-1">Webcam Error</h3>
-        <p className="text-sm">{error}</p>
-      </div>
-    );
+    return <WebcamErrorDisplay error={error} onRetry={() => window.location.reload()} />;
   }
 
   return (

@@ -12,18 +12,35 @@ export interface PoseData {
   timestamp: number;
 }
 
+export interface TrackingError {
+  message: string;
+  code: string;
+  timestamp: number;
+  recoverable: boolean;
+}
+
 interface PoseTrackingStore {
   pose: PoseData | null;
   isTracking: boolean;
+  error: TrackingError | null;
+  isInitializing: boolean;
   setPose: (pose: PoseData | null) => void;
   setIsTracking: (isTracking: boolean) => void;
+  setError: (error: TrackingError | null) => void;
+  setInitializing: (isInitializing: boolean) => void;
+  clearError: () => void;
 }
 
 export const usePoseTrackingStore = create<PoseTrackingStore>((set) => ({
   pose: null,
   isTracking: false,
-  setPose: (pose) => set({ pose }),
+  error: null,
+  isInitializing: false,
+  setPose: (pose) => set({ pose, error: null }), // Clear error on successful update
   setIsTracking: (isTracking) => set({ isTracking }),
+  setError: (error) => set({ error }),
+  setInitializing: (isInitializing) => set({ isInitializing }),
+  clearError: () => set({ error: null }),
 }));
 
 // MoveNet keypoint indices (COCO format - 17 keypoints)

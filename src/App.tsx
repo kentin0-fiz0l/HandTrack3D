@@ -10,6 +10,7 @@ import { ObjectPropertyEditor } from './components/ObjectPropertyEditor';
 import { HintsManager } from './components/Hints';
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { DepthBreakdownPanel } from './components/Debug/DepthBreakdownPanel';
+import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDisplay';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSceneStore } from './stores/sceneStore';
 import { useSettingsStore } from './stores/settingsStore';
@@ -109,6 +110,9 @@ function App() {
 
       {/* Tutorial Overlay */}
       <TutorialOverlay />
+
+      {/* Tracking Error Display */}
+      <TrackingErrorDisplay onRetry={() => window.location.reload()} />
 
       {/* 3D Canvas */}
       <HandTrackingCanvas

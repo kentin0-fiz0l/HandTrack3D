@@ -15,6 +15,8 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
   const [isReady, setIsReady] = useState(false);
   const setPose = usePoseTrackingStore((state) => state.setPose);
   const setIsTracking = usePoseTrackingStore((state) => state.setIsTracking);
+  const setError = usePoseTrackingStore((state) => state.setError);
+  const setInitializing = usePoseTrackingStore((state) => state.setInitializing);
   const detectionConfidence = useSettingsStore((state) => state.detectionConfidence);
 
   useEffect(() => {
@@ -24,6 +26,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
     let isActive = true;
 
     console.log('[MoveNet] Initializing pose detector...');
+    setInitializing(true);
 
     // Initialize MoveNet detector
     const initializeDetector = async () => {
@@ -50,6 +53,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
 
         detectorRef.current = detector;
         setIsReady(true);
+        setInitializing(false);
         console.log('[MoveNet] Pose detector initialized successfully');
 
         // Start detection loop with FPS decoupling
@@ -101,6 +105,12 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
             // On skipped frames, previous pose state is automatically reused
           } catch (error) {
             console.warn('[MoveNet] Detection error:', error);
+            setError({
+              message: 'Pose detection failed. Retrying...',
+              code: 'DETECTION_ERROR',
+              timestamp: Date.now(),
+              recoverable: true,
+            });
           }
 
           if (isActive) {
@@ -111,6 +121,13 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
         detect();
       } catch (error) {
         console.error('[MoveNet] Failed to initialize pose detector:', error);
+        setInitializing(false);
+        setError({
+          message: error instanceof Error ? error.message : 'Failed to initialize pose tracking',
+          code: 'INITIALIZATION_ERROR',
+          timestamp: Date.now(),
+          recoverable: true,
+        });
         setPose(null);
         setIsTracking(false);
       }
