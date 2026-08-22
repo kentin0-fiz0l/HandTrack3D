@@ -8,6 +8,12 @@ import {
   isNearBoundary,
   type DepthConfidenceFactors,
 } from './adaptiveDepth';
+import {
+  applyAdaptiveSmoothing,
+  clearSmoothingState,
+  clearAllSmoothingState,
+  DEFAULT_SMOOTHING_CONFIG,
+} from './adaptiveSmoothing';
 
 // Smoothing state for Z-axis (per hand)
 const zSmoothingCache = new Map<string, number>();
@@ -168,10 +174,9 @@ export function mapHandTo3D(
   // Combine all methods with adaptive weighted average
   const rawZ = calculateAdaptiveDepth(mediaPipeZ, handSizeZ, armExtensionZ, weights);
 
-  // Apply exponential moving average smoothing to reduce jitter
-  const previousZ = zSmoothingCache.get(handId) ?? rawZ;
-  const smoothedZ = previousZ + SMOOTHING_FACTOR * (rawZ - previousZ);
-  zSmoothingCache.set(handId, smoothedZ);
+  // Apply adaptive smoothing to reduce jitter while preserving responsiveness
+  // Uses motion-aware filtering: heavy smoothing for small movements, light for large
+  const smoothedZ = applyAdaptiveSmoothing(handId, rawZ, DEFAULT_SMOOTHING_CONFIG);
 
   return new THREE.Vector3(x, y, smoothedZ);
 }
@@ -180,6 +185,8 @@ export function mapHandTo3D(
  * Clear smoothing cache for a specific hand (call when hand disappears)
  */
 export function clearHandSmoothingCache(handId: string): void {
+  clearSmoothingState(handId);
+  // Keep old cache clear for backwards compatibility
   zSmoothingCache.delete(handId);
 }
 
@@ -187,6 +194,8 @@ export function clearHandSmoothingCache(handId: string): void {
  * Clear all smoothing caches
  */
 export function clearAllSmoothingCaches(): void {
+  clearAllSmoothingState();
+  // Keep old cache clear for backwards compatibility
   zSmoothingCache.clear();
 }
 
