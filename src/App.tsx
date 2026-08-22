@@ -9,8 +9,10 @@ import { GestureStatusWidget } from './components/GestureStatusWidget/GestureSta
 import { ObjectPropertyEditor } from './components/ObjectPropertyEditor';
 import { HintsManager } from './components/Hints';
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
+import { DepthBreakdownPanel } from './components/Debug/DepthBreakdownPanel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSceneStore } from './stores/sceneStore';
+import { useSettingsStore } from './stores/settingsStore';
 import type { SceneObject } from './types/scene.types';
 
 function App() {
@@ -20,6 +22,11 @@ function App() {
   const [selectedColor, setSelectedColor] = useState('#3b82f6');
   const [selectedSize, setSelectedSize] = useState(1.0);
   const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+
+  // Debug toggles
+  const showDepthBreakdown = useSettingsStore((state) => state.showDepthBreakdown);
+  const showPoseSkeleton = useSettingsStore((state) => state.showPoseSkeleton);
+  const updateVisualSetting = useSettingsStore((state) => state.updateVisualSetting);
 
   const handleSelectionChange = (
     type: SceneObject['type'],
@@ -35,6 +42,8 @@ function App() {
     onTogglePanel: () => setShowPanel((prev) => !prev),
     onToggleSettings: () => setShowSettings((prev) => !prev),
     onToggleBuildMode: toggleBuildMode,
+    onTogglePoseSkeleton: () => updateVisualSetting('showPoseSkeleton', !showPoseSkeleton),
+    onToggleDepthBreakdown: () => updateVisualSetting('showDepthBreakdown', !showDepthBreakdown),
   });
 
   return (
@@ -89,6 +98,9 @@ function App() {
       {/* Gesture Status Widget */}
       <GestureStatusWidget />
 
+      {/* Depth Breakdown Debug Panel */}
+      <DepthBreakdownPanel show={showDepthBreakdown} />
+
       {/* Object Property Editor */}
       <ObjectPropertyEditor />
 
@@ -119,6 +131,8 @@ function App() {
           <li>• Press <strong>H</strong> to toggle status panel</li>
           <li>• Press <strong>S</strong> to open settings</li>
           <li>• Press <strong>B</strong> to toggle build mode</li>
+          <li>• Press <strong>P</strong> to toggle pose skeleton (debug)</li>
+          <li>• Press <strong>D</strong> to toggle depth breakdown (debug)</li>
         </ul>
         <div className="mt-3 pt-3 border-t border-white/20">
           <h4 className="font-semibold mb-1 text-xs">Camera Controls</h4>

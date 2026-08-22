@@ -5,6 +5,8 @@ export function useKeyboardShortcuts(callbacks: {
   onTogglePanel?: () => void;
   onToggleSettings?: () => void;
   onToggleBuildMode?: () => void;
+  onTogglePoseSkeleton?: () => void;
+  onToggleDepthBreakdown?: () => void;
 }) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -30,6 +32,18 @@ export function useKeyboardShortcuts(callbacks: {
       if (event.code === 'KeyB' && !event.repeat) {
         event.preventDefault();
         callbacks.onToggleBuildMode?.();
+      }
+
+      // P: Toggle pose skeleton overlay (debug)
+      if (event.code === 'KeyP' && !event.repeat) {
+        event.preventDefault();
+        callbacks.onTogglePoseSkeleton?.();
+      }
+
+      // D: Toggle depth breakdown panel (debug)
+      if (event.code === 'KeyD' && !event.repeat) {
+        event.preventDefault();
+        callbacks.onToggleDepthBreakdown?.();
       }
     }
 

@@ -28,11 +28,12 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
     // Initialize MoveNet detector
     const initializeDetector = async () => {
       try {
+        // Set backend to WebGL explicitly BEFORE calling ready()
+        // This ensures TensorFlow doesn't try to initialize webgpu first
+        await tf.setBackend('webgl');
+
         // Wait for TensorFlow.js backend to be ready
         await tf.ready();
-
-        // Set backend to WebGL explicitly
-        await tf.setBackend('webgl');
 
         const detector = await poseDetection.createDetector(
           poseDetection.SupportedModels.MoveNet,

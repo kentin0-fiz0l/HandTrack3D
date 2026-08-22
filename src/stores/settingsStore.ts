@@ -27,6 +27,8 @@ interface SettingsStore {
   showHandSkeleton: boolean; // Toggle hand skeleton visualization
   showPerformance: boolean; // Toggle performance monitoring dashboard
   showGrabRange: boolean; // Toggle grab range visualization spheres
+  showPoseSkeleton: boolean; // Toggle pose/body skeleton overlay (MoveNet)
+  showDepthBreakdown: boolean; // Toggle depth calculation debug panel
 
   // Current preset (null if custom)
   currentPreset: string | null;
@@ -46,7 +48,7 @@ interface SettingsStore {
     key: K,
     value: SettingsStore[K]
   ) => void;
-  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange'>>(
+  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange' | 'showPoseSkeleton' | 'showDepthBreakdown'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -79,6 +81,8 @@ const DEFAULT_SETTINGS = {
   showHandSkeleton: true,
   showPerformance: true,
   showGrabRange: true,
+  showPoseSkeleton: false, // Debug: pose skeleton overlay
+  showDepthBreakdown: false, // Debug: depth calculation panel
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
@@ -96,6 +100,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       showHandSkeleton: true,
       showPerformance: true,
       showGrabRange: true,
+      showPoseSkeleton: false,
+      showDepthBreakdown: false,
       // Physics boolean settings not affected by presets
       gravityEnabled: true,
       // Tracking maxHands not affected by presets

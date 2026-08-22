@@ -3,6 +3,7 @@ import { useHandTracking } from '@/hooks/useHandTracking';
 import { useMoveNetTracking } from '@/hooks/useMoveNetTracking';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { HandOverlay } from './HandOverlay';
+import { PoseSkeletonOverlay } from './PoseSkeletonOverlay';
 
 interface WebcamFeedProps {
   showPreview?: boolean;
@@ -14,6 +15,7 @@ const PREVIEW_HEIGHT = 240;
 export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   const { videoRef, isReady, error } = useWebcam();
   const showWebcam = useSettingsStore((state) => state.showWebcam);
+  const showPoseSkeleton = useSettingsStore((state) => state.showPoseSkeleton);
 
   // Initialize hand tracking
   useHandTracking(videoRef.current, isReady);
@@ -51,9 +53,17 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
               muted
             />
             <HandOverlay width={PREVIEW_WIDTH} height={PREVIEW_HEIGHT} />
+            <PoseSkeletonOverlay
+              videoWidth={PREVIEW_WIDTH}
+              videoHeight={PREVIEW_HEIGHT}
+              show={showPoseSkeleton}
+            />
             <div className="absolute top-2 right-2 bg-green-500 w-3 h-3 rounded-full animate-pulse" />
           </div>
-          <p className="text-white text-xs mt-1 text-center">Hand Tracking Active</p>
+          <p className="text-white text-xs mt-1 text-center">
+            Hand Tracking Active
+            {showPoseSkeleton && ' • Pose Overlay'}
+          </p>
         </div>
       )}
     </>
