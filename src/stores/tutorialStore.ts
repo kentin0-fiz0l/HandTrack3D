@@ -1,121 +1,92 @@
 import { create } from 'zustand';
 
-const TUTORIAL_COMPLETED_KEY = 'handtrack3d_tutorial_completed';
-const TUTORIAL_SKIPPED_KEY = 'handtrack3d_tutorial_skipped';
+/**
+ * Tutorial Store
+ * 
+ * Tracks tutorial progress and state for interactive onboarding.
+ * Used by TutorialOverlay to determine when to advance steps.
+ */
 
-export interface TutorialStore {
-  // State
-  isActive: boolean;
+interface TutorialStore {
+  // Current state
+  gestureDetected: string | null;
+  nearObject: boolean;
+  objectGrabbed: boolean;
+  handDetected: boolean;
+  webcamEnabled: boolean;
+  
+  // Tutorial progress
   currentStep: number;
-  completedSteps: Set<number>;
-  hasCompletedTutorial: boolean;
-  hasSkippedTutorial: boolean;
-
+  completed: boolean;
+  dismissed: boolean;
+  
   // Actions
-  startTutorial: () => void;
-  nextStep: () => void;
-  skipTutorial: () => void;
-  completeTutorial: () => void;
+  updateTutorialState: (updates: Partial<Omit<TutorialStore, 'updateTutorialState' | 'advanceStep' | 'resetTutorial' | 'dismissTutorial' | 'completeTutorial'>>) => void;
+  advanceStep: () => void;
   resetTutorial: () => void;
-  markStepComplete: (step: number) => void;
+  dismissTutorial: () => void;
+  completeTutorial: () => void;
 }
-
-// Load initial state from localStorage
-const loadTutorialState = () => {
-  try {
-    const completed = localStorage.getItem(TUTORIAL_COMPLETED_KEY) === 'true';
-    const skipped = localStorage.getItem(TUTORIAL_SKIPPED_KEY) === 'true';
-    return { completed, skipped };
-  } catch (error) {
-    console.error('Failed to load tutorial state:', error);
-    return { completed: false, skipped: false };
-  }
-};
-
-const initialState = loadTutorialState();
 
 export const useTutorialStore = create<TutorialStore>((set, get) => ({
   // Initial state
-  isActive: !initialState.completed && !initialState.skipped,
+  gestureDetected: null,
+  nearObject: false,
+  objectGrabbed: false,
+  handDetected: false,
+  webcamEnabled: false,
+  
   currentStep: 0,
-  completedSteps: new Set<number>(),
-  hasCompletedTutorial: initialState.completed,
-  hasSkippedTutorial: initialState.skipped,
-
-  // Start tutorial (for replay functionality)
-  startTutorial: () =>
-    set({
-      isActive: true,
-      currentStep: 0,
-      completedSteps: new Set<number>(),
-    }),
-
+  completed: false,
+  dismissed: false,
+  
+  // Update tutorial state (called by components when conditions change)
+  updateTutorialState: (updates) => set((state) => ({ ...state, ...updates })),
+  
   // Advance to next step
-  nextStep: () => {
-    const { currentStep, completedSteps } = get();
-    const newCompletedSteps = new Set(completedSteps);
-    newCompletedSteps.add(currentStep);
-
-    // Tutorial has 6 steps (0-5), step 5 is the last
-    if (currentStep >= 5) {
-      // Tutorial complete
-      get().completeTutorial();
-    } else {
-      set({
-        currentStep: currentStep + 1,
-        completedSteps: newCompletedSteps,
-      });
-    }
+  advanceStep: () => set((state) => ({ 
+    currentStep: state.currentStep + 1 
+  })),
+  
+  // Reset tutorial to beginning
+  resetTutorial: () => set({
+    gestureDetected: null,
+    nearObject: false,
+    objectGrabbed: false,
+    handDetected: false,
+    webcamEnabled: false,
+    currentStep: 0,
+    completed: false,
+    dismissed: false,
+  }),
+  
+  // Dismiss tutorial (user clicked skip)
+  dismissTutorial: () => {
+    set({ dismissed: true });
+    localStorage.setItem('tutorial_dismissed', 'true');
   },
-
-  // Mark a specific step as complete (for conditional progress)
-  markStepComplete: (step: number) => {
-    const { completedSteps } = get();
-    const newCompletedSteps = new Set(completedSteps);
-    newCompletedSteps.add(step);
-    set({ completedSteps: newCompletedSteps });
-  },
-
-  // Skip tutorial entirely
-  skipTutorial: () => {
-    try {
-      localStorage.setItem(TUTORIAL_SKIPPED_KEY, 'true');
-      set({
-        isActive: false,
-        hasSkippedTutorial: true,
-      });
-    } catch (error) {
-      console.error('Failed to save tutorial skip state:', error);
-    }
-  },
-
-  // Complete tutorial
+  
+  // Complete tutorial (reached final step)
   completeTutorial: () => {
-    try {
-      localStorage.setItem(TUTORIAL_COMPLETED_KEY, 'true');
-      set({
-        isActive: false,
-        hasCompletedTutorial: true,
-      });
-    } catch (error) {
-      console.error('Failed to save tutorial completion state:', error);
-    }
-  },
-
-  // Reset tutorial (clear localStorage and restart)
-  resetTutorial: () => {
-    try {
-      localStorage.removeItem(TUTORIAL_COMPLETED_KEY);
-      localStorage.removeItem(TUTORIAL_SKIPPED_KEY);
-      set({
-        isActive: true,
-        currentStep: 0,
-        completedSteps: new Set<number>(),
-        hasCompletedTutorial: false,
-        hasSkippedTutorial: false,
-      });
-    } catch (error) {
-      console.error('Failed to reset tutorial state:', error);
-    }
+    set({ completed: true, dismissed: true });
+    localStorage.setItem('tutorial_completed', 'true');
   },
 }));
+
+/**
+ * Check if tutorial should be shown
+ */
+export function shouldShowTutorial(): boolean {
+  const completed = localStorage.getItem('tutorial_completed');
+  const dismissed = localStorage.getItem('tutorial_dismissed');
+  return !completed && !dismissed;
+}
+
+/**
+ * Clear tutorial progress (for testing)
+ */
+export function clearTutorialProgress(): void {
+  localStorage.removeItem('tutorial_completed');
+  localStorage.removeItem('tutorial_dismissed');
+  useTutorialStore.getState().resetTutorial();
+}

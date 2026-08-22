@@ -3,9 +3,10 @@ import { OrbitControls, Grid } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
-import { useGestureRecognition } from '@/hooks/useGestureRecognition';
+import { useGestureRecognition, useGestureStore } from '@/hooks/useGestureRecognition';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useHandTrackingStore } from '@/stores/handTrackingStore';
+import { useTutorialStore } from '@/stores/tutorialStore';
 import { HandMesh } from './HandMesh';
 import { HandSkeleton } from '@/components/HandSkeleton/HandSkeleton';
 import { InteractiveObject } from './InteractiveObject';
@@ -14,7 +15,7 @@ import { BuildModeController } from '@/components/BuildMode/BuildModeController'
 import { GhostPreview } from '@/components/BuildMode/GhostPreview';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { SceneObject } from '@/types/scene.types';
 
 interface Scene3DProps {
@@ -33,6 +34,11 @@ export function Scene3D({
   const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
   const buildMode = useSceneStore((state) => state.buildMode);
   const hands = useHandTrackingStore((state) => state.hands);
+  const gestures = useGestureStore((state) => state.gestures);
+  const grabbedObjects = useSceneStore((state) => state.grabbedObjects);
+  const getNearObjects = useSceneStore((state) => state.getNearObjects);
+  const grabRange = useSettingsStore((state) => state.grabRange);
+  const updateTutorialState = useTutorialStore((state) => state.updateTutorialState);
   const { camera, size } = useThree();
 
   // Map hand positions to 3D space
@@ -40,6 +46,35 @@ export function Scene3D({
 
   // Detect gestures
   useGestureRecognition();
+
+  // Tutorial state tracking
+  useEffect(() => {
+    // Track hand detection
+    updateTutorialState({ handDetected: cursors.length > 0 });
+  }, [cursors.length, updateTutorialState]);
+
+  useEffect(() => {
+    // Track gesture detection
+    const currentGesture = gestures[0]?.gesture || null;
+    updateTutorialState({ gestureDetected: currentGesture });
+  }, [gestures, updateTutorialState]);
+
+  useEffect(() => {
+    // Track near object and grabbed object
+    if (cursors.length > 0) {
+      const nearObjects = getNearObjects(cursors[0].position, grabRange);
+      const isGrabbing = grabbedObjects.size > 0;
+      updateTutorialState({
+        nearObject: nearObjects.length > 0,
+        objectGrabbed: isGrabbing,
+      });
+    } else {
+      updateTutorialState({
+        nearObject: false,
+        objectGrabbed: false,
+      });
+    }
+  }, [cursors, grabbedObjects, getNearObjects, grabRange, updateTutorialState]);
 
   // Map all hand landmarks to 3D space for skeleton visualization
   const handSkeletons = useMemo(() => {

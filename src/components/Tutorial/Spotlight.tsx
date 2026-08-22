@@ -1,88 +1,28 @@
-import { useEffect, useState } from 'react';
+/**
+ * Spotlight effect that highlights specific elements during tutorial
+ * Creates a dark overlay with a transparent "spotlight" area
+ */
 
 interface SpotlightProps {
-  targetSelector?: string;
+  target: string; // 'nearest-object' | 'grabbed-object' | specific element selector
 }
 
-export function Spotlight({ targetSelector }: SpotlightProps) {
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-
-  useEffect(() => {
-    if (!targetSelector) {
-      setTargetRect(null);
-      return;
-    }
-
-    const updateTargetRect = () => {
-      const element = document.querySelector(targetSelector);
-      if (element) {
-        setTargetRect(element.getBoundingClientRect());
-      } else {
-        setTargetRect(null);
-      }
-    };
-
-    // Initial update
-    updateTargetRect();
-
-    // Update on resize and scroll
-    window.addEventListener('resize', updateTargetRect);
-    window.addEventListener('scroll', updateTargetRect, true);
-
-    // Polling fallback for dynamic elements (every 500ms)
-    const interval = setInterval(updateTargetRect, 500);
-
-    return () => {
-      window.removeEventListener('resize', updateTargetRect);
-      window.removeEventListener('scroll', updateTargetRect, true);
-      clearInterval(interval);
-    };
-  }, [targetSelector]);
-
-  if (!targetRect) {
-    return null;
-  }
-
-  // Create spotlight effect with SVG mask
+export function Spotlight({ target }: SpotlightProps) {
+  // For now, create a simple overlay effect
+  // In a full implementation, this would calculate the position and size
+  // of the target element and create a spotlight cutout
+  
   return (
-    <div className="fixed inset-0 pointer-events-none z-50">
-      <svg width="100%" height="100%" className="absolute inset-0">
-        <defs>
-          <mask id="spotlight-mask">
-            {/* White background (visible) */}
-            <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {/* Black cutout (transparent) with padding */}
-            <rect
-              x={targetRect.left - 8}
-              y={targetRect.top - 8}
-              width={targetRect.width + 16}
-              height={targetRect.height + 16}
-              rx="12"
-              fill="black"
-            />
-          </mask>
-        </defs>
-        {/* Dark overlay with spotlight cutout */}
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="rgba(0, 0, 0, 0.7)"
-          mask="url(#spotlight-mask)"
-        />
-      </svg>
-      {/* Animated border around spotlight target */}
-      <div
-        className="absolute border-2 border-blue-400 rounded-xl animate-pulse"
-        style={{
-          left: targetRect.left - 8,
-          top: targetRect.top - 8,
-          width: targetRect.width + 16,
-          height: targetRect.height + 16,
-          boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)',
-        }}
-      />
+    <div 
+      className="fixed inset-0 pointer-events-none z-40"
+      style={{
+        background: 'radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.7) 60%)',
+      }}
+    >
+      {/* Optional: Add animated ring around spotlight */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div className="w-96 h-96 rounded-full border-4 border-blue-500/30 animate-pulse" />
+      </div>
     </div>
   );
 }

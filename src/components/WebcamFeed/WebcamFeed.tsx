@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useWebcam } from '@/hooks/useWebcam';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { useMoveNetTracking } from '@/hooks/useMoveNetTracking';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useTutorialStore } from '@/stores/tutorialStore';
 import { HandOverlay } from './HandOverlay';
 import { PoseSkeletonOverlay } from './PoseSkeletonOverlay';
 import { WebcamErrorDisplay } from '@/components/ErrorDisplay/WebcamErrorDisplay';
@@ -17,12 +19,18 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   const { videoRef, isReady, error } = useWebcam();
   const showWebcam = useSettingsStore((state) => state.showWebcam);
   const showPoseSkeleton = useSettingsStore((state) => state.showPoseSkeleton);
+  const updateTutorialState = useTutorialStore((state) => state.updateTutorialState);
 
   // Initialize hand tracking
   useHandTracking(videoRef.current, isReady);
 
   // Initialize body/pose tracking for depth context using MoveNet
   useMoveNetTracking(videoRef.current);
+
+  // Track webcam state for tutorial
+  useEffect(() => {
+    updateTutorialState({ webcamEnabled: isReady });
+  }, [isReady, updateTutorialState]);
 
   if (error) {
     return <WebcamErrorDisplay error={error} onRetry={() => window.location.reload()} />;

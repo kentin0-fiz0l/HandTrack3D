@@ -1,69 +1,99 @@
+/**
+ * Tutorial Steps for HandTrack3D
+ * 
+ * 6-step interactive tutorial that guides new users through core interactions.
+ * Each step has a success condition that auto-advances when met.
+ */
+
 export interface TutorialStep {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  instruction: string;
-  successCondition: 'manual' | 'webcam' | 'hand-detected' | 'pinch-near-object' | 'object-grabbed' | 'object-released';
-  spotlightTarget?: string; // CSS selector for spotlight
-  position: 'center' | 'top' | 'bottom';
+  action: 'click-continue' | 'wait-for-webcam' | 'wait-for-hand-detected' | 'wait-for-condition';
+  highlight: string | null;
+  helpImage?: string;
+  successCondition?: (state: {
+    gestureDetected: string | null;
+    nearObject: boolean;
+    objectGrabbed: boolean;
+    handDetected: boolean;
+    webcamEnabled: boolean;
+  }) => boolean;
 }
 
-export const tutorialSteps: TutorialStep[] = [
+export const TUTORIAL_STEPS: TutorialStep[] = [
   {
-    id: 0,
-    title: 'Welcome to HandTrack3D!',
-    description: 'Learn to interact with 3D objects using your hands and webcam.',
-    instruction: 'This tutorial will guide you through the basics of hand tracking and gesture control. Click "Next" to begin.',
-    successCondition: 'manual',
-    position: 'center',
+    id: 'welcome',
+    title: 'Welcome to HandTrack3D',
+    description: 'Control 3D objects with your hands using just your webcam. No special hardware needed! Let\'s learn the basics.',
+    action: 'click-continue',
+    highlight: null,
   },
+  
   {
-    id: 1,
-    title: 'Enable Your Webcam',
-    description: 'HandTrack3D uses your webcam to track your hand movements.',
-    instruction: 'Please allow webcam access when prompted by your browser. We only process video locally - nothing is sent to any server.',
-    successCondition: 'webcam',
-    position: 'top',
+    id: 'webcam',
+    title: 'Allow Webcam Access',
+    description: 'We need your camera to track your hands. Click "Allow" when your browser asks for camera permission.',
+    action: 'wait-for-webcam',
+    highlight: null,
+    successCondition: (state) => state.webcamEnabled,
   },
+  
   {
-    id: 2,
+    id: 'show-hand',
     title: 'Show Your Hand',
-    description: 'Position your hand in front of the camera.',
-    instruction: 'Hold your hand up so the webcam can see it. You should see a colored cursor appear in the 3D scene when your hand is detected.',
-    successCondition: 'hand-detected',
-    spotlightTarget: '.gesture-status-widget',
-    position: 'top',
+    description: 'Hold your hand in front of the camera with your palm facing forward. You\'ll see a colored cursor appear in the 3D scene.',
+    action: 'wait-for-condition',
+    highlight: null,
+    helpImage: '/tutorial/hand-position.png',
+    successCondition: (state) => state.handDetected,
   },
+  
   {
-    id: 3,
-    title: 'Try the Pinch Gesture',
-    description: 'Make a pinch gesture near the blue cube.',
-    instruction: 'Bring your thumb and index finger together to make a "pinch" gesture. Move your hand near the blue cube until you see the grab range sphere turn green.',
-    successCondition: 'pinch-near-object',
-    position: 'bottom',
+    id: 'pinch',
+    title: 'Pinch Gesture',
+    description: 'Touch your thumb and index finger together to make a pinch gesture. Move your hand near one of the cubes.',
+    action: 'wait-for-condition',
+    highlight: 'nearest-object',
+    successCondition: (state) => state.gestureDetected === 'pinch' && state.nearObject,
   },
+  
   {
-    id: 4,
+    id: 'grab',
     title: 'Grab and Move',
-    description: 'While pinching, move the object around.',
-    instruction: 'Keep your fingers pinched and move your hand to drag the object. Notice how the object follows your hand movement.',
-    successCondition: 'object-grabbed',
-    position: 'bottom',
+    description: 'While pinching near an object, it will attach to your hand. Move your hand around to drag the object in 3D space!',
+    action: 'wait-for-condition',
+    highlight: 'grabbed-object',
+    successCondition: (state) => state.objectGrabbed,
   },
+  
   {
-    id: 5,
+    id: 'release',
     title: 'Release the Object',
-    description: 'Open your hand to let go.',
-    instruction: 'Open your hand to release the object. The object will fall or stay where you placed it. Congratulations! You\'ve mastered the basics!',
-    successCondition: 'object-released',
-    position: 'bottom',
+    description: 'Open your hand (spread your fingers apart) to release the object. It will fall back down with realistic physics!',
+    action: 'wait-for-condition',
+    highlight: null,
+    successCondition: (state) => state.gestureDetected === 'open' && !state.objectGrabbed,
   },
 ];
 
-export const getTutorialStep = (stepId: number): TutorialStep | undefined => {
-  return tutorialSteps.find((step) => step.id === stepId);
-};
+/**
+ * Get tutorial step by ID
+ */
+export function getTutorialStep(id: string): TutorialStep | undefined {
+  return TUTORIAL_STEPS.find(step => step.id === id);
+}
 
-export const getTotalSteps = (): number => {
-  return tutorialSteps.length;
-};
+/**
+ * Get tutorial step by index
+ */
+export function getTutorialStepByIndex(index: number): TutorialStep | undefined {
+  return TUTORIAL_STEPS[index];
+}
+
+/**
+ * Get total number of tutorial steps
+ */
+export function getTotalSteps(): number {
+  return TUTORIAL_STEPS.length;
+}
