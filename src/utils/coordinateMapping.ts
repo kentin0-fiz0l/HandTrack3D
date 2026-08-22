@@ -1,6 +1,13 @@
 import * as THREE from 'three';
 import type { HandLandmark } from '@/types/hand.types';
 import { usePoseTrackingStore, PoseLandmarks } from '@/stores/poseTrackingStore';
+import {
+  calculateAdaptiveWeights,
+  calculateAdaptiveDepth,
+  isHandFullyVisible,
+  isNearBoundary,
+  type DepthConfidenceFactors,
+} from './adaptiveDepth';
 
 // Smoothing state for Z-axis (per hand)
 const zSmoothingCache = new Map<string, number>();
@@ -139,14 +146,27 @@ export function mapHandTo3D(
   const handSize = calculateHandSize(allLandmarks);
   const handSizeZ = -handSize * 30 - 3; // Direct relationship: larger hand = more negative Z
 
-  // 3. Arm extension from pose tracking (30% weight)
+  // 3. Arm extension from pose tracking (default 30% weight, adaptive)
   // Extended arm = hand reaches farther forward (more negative Z)
   // Bent arm = hand stays closer to body (less negative Z)
   const armExtension = calculateArmExtension(landmark.x, handedness);
   const armExtensionZ = -armExtension * 2 - 3; // Extended = -5, Bent = -3
 
-  // Combine all methods with weighted average
-  const rawZ = 0.2 * mediaPipeZ + 0.5 * handSizeZ + 0.3 * armExtensionZ;
+  // Calculate adaptive weights based on confidence factors
+  const pose = usePoseTrackingStore.getState().pose;
+  const confidenceFactors: DepthConfidenceFactors = {
+    mediaPipeConfidence: landmark.visibility || 0.8, // Use landmark visibility or default
+    poseConfidence: pose && pose.landmarks.length > 0
+      ? Math.min(...pose.landmarks.map(lm => lm.visibility || 0))
+      : null,
+    handFullyVisible: isHandFullyVisible(allLandmarks, 0.5),
+    nearBoundary: isNearBoundary(allLandmarks, 0.1),
+  };
+
+  const weights = calculateAdaptiveWeights(confidenceFactors);
+
+  // Combine all methods with adaptive weighted average
+  const rawZ = calculateAdaptiveDepth(mediaPipeZ, handSizeZ, armExtensionZ, weights);
 
   // Apply exponential moving average smoothing to reduce jitter
   const previousZ = zSmoothingCache.get(handId) ?? rawZ;

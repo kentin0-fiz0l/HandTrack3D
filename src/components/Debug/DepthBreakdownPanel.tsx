@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { usePoseTrackingStore } from '@/stores/poseTrackingStore';
+import { formatWeights, type DepthWeights } from '@/utils/adaptiveDepth';
 
 interface DepthBreakdownPanelProps {
   show: boolean;
@@ -14,6 +15,8 @@ interface DepthData {
   armExtension: number;
   confidence: number;
   poseAvailable: boolean;
+  weights?: DepthWeights; // Adaptive weights being used
+  adaptive: boolean; // Whether adaptive weighting is active
 }
 
 export function DepthBreakdownPanel({ show }: DepthBreakdownPanelProps) {
@@ -91,23 +94,30 @@ export function DepthBreakdownPanel({ show }: DepthBreakdownPanelProps) {
             <DepthComponent
               label="MediaPipe Z"
               value={data.mediaPipeZ}
-              weight={20}
+              weight={data.weights ? Math.round(data.weights.mediaPipe * 100) : 20}
               color="blue"
             />
             <DepthComponent
               label="Hand Size"
               value={data.handSize}
-              weight={50}
+              weight={data.weights ? Math.round(data.weights.handSize * 100) : 50}
               color="purple"
             />
             <DepthComponent
               label="Arm Extension"
               value={data.armExtension}
-              weight={30}
+              weight={data.weights ? Math.round(data.weights.armExtension * 100) : 30}
               color="yellow"
               available={data.poseAvailable}
             />
           </div>
+
+          {/* Adaptive Mode Indicator */}
+          {data.adaptive && data.weights && (
+            <div className="mt-2 text-xs text-green-400 bg-green-900/30 p-2 rounded">
+              ✨ Adaptive weighting active: {formatWeights(data.weights)}
+            </div>
+          )}
 
           {!data.poseAvailable && (
             <div className="mt-2 text-xs text-orange-400 bg-orange-900/30 p-2 rounded">
@@ -119,8 +129,15 @@ export function DepthBreakdownPanel({ show }: DepthBreakdownPanelProps) {
 
       {/* Legend */}
       <div className="mt-4 pt-3 border-t border-gray-700 text-xs text-gray-400">
-        <div>Formula: 0.2×MediaPipe + 0.5×Size + 0.3×Arm</div>
-        <div className="mt-1">Smoothing: EMA (α=0.3)</div>
+        <div className="text-green-400 font-semibold">✨ Adaptive Weighting Enabled</div>
+        <div className="mt-1">Weights adjust based on:</div>
+        <ul className="ml-4 mt-1 space-y-0.5">
+          <li>• Hand detection confidence</li>
+          <li>• Pose tracking availability</li>
+          <li>• Landmark visibility</li>
+          <li>• Hand position (boundary check)</li>
+        </ul>
+        <div className="mt-2">Smoothing: EMA (α=0.3)</div>
       </div>
     </div>
   );
