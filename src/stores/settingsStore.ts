@@ -29,6 +29,8 @@ interface SettingsStore {
   showGrabRange: boolean; // Toggle grab range visualization spheres
   showPoseSkeleton: boolean; // Toggle pose/body skeleton overlay (MoveNet)
   showDepthBreakdown: boolean; // Toggle depth calculation debug panel
+  showGestureWidget: boolean; // Toggle real-time gesture status widget
+  compactGestureWidget: boolean; // Use compact mode for gesture widget
 
   // Performance Settings
   poseTrackingEnabled: boolean; // Toggle pose tracking (disable for better performance)
@@ -51,7 +53,7 @@ interface SettingsStore {
     key: K,
     value: SettingsStore[K]
   ) => void;
-  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange' | 'showPoseSkeleton' | 'showDepthBreakdown'>>(
+  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange' | 'showPoseSkeleton' | 'showDepthBreakdown' | 'showGestureWidget' | 'compactGestureWidget'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -90,6 +92,8 @@ const DEFAULT_SETTINGS = {
   showGrabRange: true,
   showPoseSkeleton: false, // Debug: pose skeleton overlay
   showDepthBreakdown: false, // Debug: depth calculation panel
+  showGestureWidget: true, // Show real-time gesture status widget
+  compactGestureWidget: false, // Use compact mode for gesture widget
 
   // Performance
   poseTrackingEnabled: true, // Enable pose tracking (disable for better performance on slow devices)
@@ -112,6 +116,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       showGrabRange: true,
       showPoseSkeleton: false,
       showDepthBreakdown: false,
+      showGestureWidget: true,
+      compactGestureWidget: false,
       // Physics boolean settings not affected by presets
       gravityEnabled: true,
       // Tracking maxHands not affected by presets

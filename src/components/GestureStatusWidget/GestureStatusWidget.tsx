@@ -1,73 +1,82 @@
 import { useState, useEffect } from 'react';
+import { useHandTrackingStore } from '@/stores/handTrackingStore';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
 import { HandGestureCard } from './HandGestureCard';
 
-const AUTO_HIDE_DELAY_MS = 3000; // 3 seconds
+interface GestureStatusWidgetProps {
+  compact?: boolean;
+}
 
-export function GestureStatusWidget() {
+export function GestureStatusWidget({ compact = false }: GestureStatusWidgetProps) {
+  const hands = useHandTrackingStore((state) => state.hands);
   const gestures = useGestureStore((state) => state.gestures);
-  const [compact, setCompact] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [visible, setVisible] = useState(true);
+  const [autoHideTimer, setAutoHideTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // Auto-hide when no hands detected for 3 seconds
+  // Auto-hide after 3 seconds of no hands detected
   useEffect(() => {
-    if (gestures.length === 0) {
+    if (hands.length === 0) {
+      // Start auto-hide timer
       const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, AUTO_HIDE_DELAY_MS);
-
-      return () => clearTimeout(timer);
+        setVisible(false);
+      }, 3000);
+      setAutoHideTimer(timer);
     } else {
-      setIsVisible(true);
+      // Hands detected, show widget and clear timer
+      setVisible(true);
+      if (autoHideTimer) {
+        clearTimeout(autoHideTimer);
+        setAutoHideTimer(null);
+      }
     }
-  }, [gestures]);
 
-  // Don't render if hidden and no gestures
-  if (!isVisible && gestures.length === 0) {
+    return () => {
+      if (autoHideTimer) {
+        clearTimeout(autoHideTimer);
+      }
+    };
+  }, [hands.length]);
+
+  // Don't render if not visible or no hands
+  if (!visible || hands.length === 0) {
     return null;
   }
 
-  // Don't render if no gestures (but still visible during fade-out period)
-  if (gestures.length === 0) {
-    return (
-      <div className="gesture-status-widget fixed bottom-20 right-4 z-40 bg-gray-900/95 text-white rounded-lg shadow-lg border border-white/20 p-3 w-64">
-        <div className="text-sm text-gray-400 text-center">No hands detected</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="gesture-status-widget fixed bottom-20 right-4 z-40 bg-gray-900/95 text-white rounded-lg shadow-lg border border-white/20 w-64">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/20">
-        <h3 className="text-sm font-semibold">Gesture Status</h3>
-        <div className="flex items-center gap-2">
+    <div className="fixed top-24 left-4 space-y-2 z-30 animate-fade-in">
+      {/* Header with toggle button */}
+      {!compact && (
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-white text-sm font-semibold">Live Gestures</h3>
           <button
-            onClick={() => setCompact(!compact)}
-            className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition text-xs"
-            title={compact ? 'Expand' : 'Compact Mode'}
+            onClick={() => setVisible(false)}
+            className="text-gray-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-white/10 transition-colors"
+            title="Hide widget"
           >
-            {compact ? '⊕' : '⊖'}
+            Hide
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Gesture Cards */}
-      <div className="p-3 space-y-2">
-        {gestures.map((gesture) => (
+      {/* Gesture cards for each hand */}
+      {hands.map((hand) => {
+        // Find corresponding gesture for this hand
+        const gesture = gestures.find((g) => g.handId === hand.handedness) || null;
+
+        return (
           <HandGestureCard
-            key={gesture.handId}
-            handId={gesture.handId}
+            key={hand.handedness}
+            hand={hand}
             gesture={gesture}
             compact={compact}
           />
-        ))}
-      </div>
+        );
+      })}
 
-      {/* Footer */}
-      {!compact && (
-        <div className="px-4 py-2 border-t border-white/20 text-xs text-gray-500">
-          Auto-hides after {AUTO_HIDE_DELAY_MS / 1000}s
+      {/* Keyboard hint */}
+      {!compact && hands.length > 0 && (
+        <div className="text-xs text-gray-500 mt-2 bg-black/30 rounded px-2 py-1">
+          💡 Press <kbd className="text-gray-300">G</kbd> to toggle compact mode
         </div>
       )}
     </div>

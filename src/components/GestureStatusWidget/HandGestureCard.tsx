@@ -1,128 +1,96 @@
-import type { HandGesture } from '@/types/gesture.types';
+import type { Gesture } from '@/types/gesture.types';
+import type { Hand } from '@/types/hand.types';
 import {
+  calculateGestureConfidence,
   getConfidenceColor,
-  getConfidenceTextColor,
-  formatConfidencePercent,
+  getConfidenceLabel,
+  getGestureEmoji,
+  formatGestureName,
 } from '@/utils/gestureConfidence';
 
 interface HandGestureCardProps {
-  handId: string;
-  gesture: HandGesture;
+  hand: Hand;
+  gesture: Gesture | null;
   compact?: boolean;
 }
 
-/**
- * Get gesture icon/emoji for visual representation
- */
-function getGestureIcon(gesture: string): string {
-  switch (gesture) {
-    case 'pinch':
-      return '🤏';
-    case 'open':
-      return '✋';
-    case 'fist':
-      return '✊';
-    case 'point':
-      return '☝️';
-    case 'swipeLeft':
-      return '👈';
-    case 'swipeRight':
-      return '👉';
-    case 'swipeUp':
-      return '👆';
-    case 'swipeDown':
-      return '👇';
-    case 'none':
-    default:
-      return '🖐️';
-  }
-}
+export function HandGestureCard({ hand, gesture, compact = false }: HandGestureCardProps) {
+  const confidence = calculateGestureConfidence(gesture, hand);
+  const confidenceColor = getConfidenceColor(confidence);
+  const confidenceLabel = getConfidenceLabel(confidence);
+  const gestureType = gesture?.gesture || 'none';
+  const gestureEmoji = getGestureEmoji(gestureType);
+  const gestureName = formatGestureName(gestureType);
 
-/**
- * Format gesture name for display
- */
-function formatGestureName(gesture: string): string {
-  switch (gesture) {
-    case 'pinch':
-      return 'Pinch';
-    case 'open':
-      return 'Open Hand';
-    case 'fist':
-      return 'Fist';
-    case 'point':
-      return 'Point';
-    case 'swipeLeft':
-      return 'Swipe Left';
-    case 'swipeRight':
-      return 'Swipe Right';
-    case 'swipeUp':
-      return 'Swipe Up';
-    case 'swipeDown':
-      return 'Swipe Down';
-    case 'none':
-    default:
-      return 'None';
-  }
-}
-
-export function HandGestureCard({ handId, gesture, compact = false }: HandGestureCardProps) {
-  const isLeft = handId.includes('left') || handId.includes('Left');
-  const handColor = isLeft ? 'text-blue-400' : 'text-purple-400';
-  const handLabel = isLeft ? 'Left' : 'Right';
-  const confidencePercent = formatConfidencePercent(gesture.confidence);
-  const confidenceBarColor = getConfidenceColor(gesture.confidence);
-  const confidenceTextColor = getConfidenceTextColor(gesture.confidence);
+  // Hand color (left = green, right = blue)
+  const handColor = hand.handedness === 'Left' ? '#4ade80' : '#3b82f6';
+  const handLabel = hand.handedness === 'Left' ? 'L' : 'R';
 
   if (compact) {
+    // Compact mode: just icon, hand label, and gesture
     return (
-      <div className="flex items-center gap-2 p-2 bg-gray-800/60 rounded">
-        <span className={`text-sm font-semibold ${handColor}`}>{handLabel[0]}</span>
-        <span className="text-lg">{getGestureIcon(gesture.gesture)}</span>
+      <div className="flex items-center gap-2 bg-black/50 rounded-lg px-3 py-2 backdrop-blur-sm">
+        {/* Hand indicator */}
         <div
-          className={`h-1.5 flex-1 rounded-full bg-gray-700 overflow-hidden`}
-          title={`${confidencePercent} confidence`}
+          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+          style={{ backgroundColor: handColor }}
         >
-          <div
-            className={`h-full ${confidenceBarColor} transition-all duration-200`}
-            style={{ width: confidencePercent }}
-          />
+          {handLabel}
+        </div>
+
+        {/* Gesture emoji and name */}
+        <div className="flex items-center gap-1">
+          <span className="text-xl">{gestureEmoji}</span>
+          <span className="text-white text-sm font-medium">{gestureName}</span>
         </div>
       </div>
     );
   }
 
+  // Full mode: hand indicator, gesture, confidence bar, and label
   return (
-    <div className="p-3 bg-gray-800/80 rounded-lg space-y-2">
-      {/* Hand Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`text-sm font-semibold ${handColor}`}>{handLabel} Hand</span>
+    <div className="bg-black/70 rounded-lg p-3 backdrop-blur-sm border border-white/10 min-w-[200px]">
+      {/* Header: Hand indicator + Gesture */}
+      <div className="flex items-center gap-2 mb-2">
+        {/* Hand indicator circle */}
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+          style={{ backgroundColor: handColor }}
+          title={`${hand.handedness} Hand`}
+        >
+          {handLabel}
         </div>
-        <span className={`text-xs font-mono ${confidenceTextColor}`}>
-          {confidencePercent}
-        </span>
+
+        {/* Gesture name and emoji */}
+        <div className="flex-1">
+          <div className="flex items-center gap-1">
+            <span className="text-2xl">{gestureEmoji}</span>
+            <span className="text-white font-semibold">{gestureName}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Gesture Display */}
-      <div className="flex items-center gap-3">
-        <span className="text-2xl" role="img" aria-label={gesture.gesture}>
-          {getGestureIcon(gesture.gesture)}
-        </span>
-        <span className="text-sm font-medium text-gray-200">
-          {formatGestureName(gesture.gesture)}
-        </span>
-      </div>
-
-      {/* Confidence Bar */}
+      {/* Confidence bar */}
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs text-gray-400">
-          <span>Confidence</span>
+        <div className="flex justify-between text-xs">
+          <span className="text-gray-400">Confidence</span>
+          <span className="text-gray-300 font-medium">{confidenceLabel}</span>
         </div>
-        <div className="h-2 rounded-full bg-gray-700 overflow-hidden">
+
+        {/* Progress bar */}
+        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
           <div
-            className={`h-full ${confidenceBarColor} transition-all duration-200`}
-            style={{ width: confidencePercent }}
+            className="h-full transition-all duration-300 ease-out"
+            style={{
+              width: `${confidence}%`,
+              backgroundColor: confidenceColor,
+            }}
           />
+        </div>
+
+        {/* Percentage */}
+        <div className="text-right">
+          <span className="text-xs text-gray-400">{Math.round(confidence)}%</span>
         </div>
       </div>
     </div>

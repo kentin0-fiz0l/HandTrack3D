@@ -30,6 +30,8 @@ function App() {
   // Debug toggles
   const showDepthBreakdown = useSettingsStore((state) => state.showDepthBreakdown);
   const showPoseSkeleton = useSettingsStore((state) => state.showPoseSkeleton);
+  const showGestureWidget = useSettingsStore((state) => state.showGestureWidget);
+  const compactGestureWidget = useSettingsStore((state) => state.compactGestureWidget);
   const updateVisualSetting = useSettingsStore((state) => state.updateVisualSetting);
 
   // Loading state
@@ -52,6 +54,7 @@ function App() {
     onToggleBuildMode: toggleBuildMode,
     onTogglePoseSkeleton: () => updateVisualSetting('showPoseSkeleton', !showPoseSkeleton),
     onToggleDepthBreakdown: () => updateVisualSetting('showDepthBreakdown', !showDepthBreakdown),
+    onToggleGestureWidget: () => updateVisualSetting('compactGestureWidget', !compactGestureWidget),
   });
 
   return (
@@ -107,7 +110,7 @@ function App() {
       <PerformanceWarning />
 
       {/* Gesture Status Widget */}
-      <GestureStatusWidget />
+      {showGestureWidget && <GestureStatusWidget compact={compactGestureWidget} />}
 
       {/* Depth Breakdown Debug Panel */}
       <DepthBreakdownPanel show={showDepthBreakdown} />
@@ -151,6 +154,7 @@ function App() {
           <li>• <strong>Right-click</strong> object to edit properties</li>
           <li>• Press <strong>H</strong> to toggle status panel</li>
           <li>• Press <strong>S</strong> to open settings</li>
+          <li>• Press <strong>G</strong> to toggle gesture widget (compact mode)</li>
           <li>• Press <strong>B</strong> to toggle build mode</li>
           <li>• Press <strong>P</strong> to toggle pose skeleton (debug)</li>
           <li>• Press <strong>D</strong> to toggle depth breakdown (debug)</li>

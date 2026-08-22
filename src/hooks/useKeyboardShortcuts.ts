@@ -7,6 +7,7 @@ export function useKeyboardShortcuts(callbacks: {
   onToggleBuildMode?: () => void;
   onTogglePoseSkeleton?: () => void;
   onToggleDepthBreakdown?: () => void;
+  onToggleGestureWidget?: () => void;
 }) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -44,6 +45,12 @@ export function useKeyboardShortcuts(callbacks: {
       if (event.code === 'KeyD' && !event.repeat) {
         event.preventDefault();
         callbacks.onToggleDepthBreakdown?.();
+      }
+
+      // G: Toggle gesture widget compact mode
+      if (event.code === 'KeyG' && !event.repeat) {
+        event.preventDefault();
+        callbacks.onToggleGestureWidget?.();
       }
     }
 
