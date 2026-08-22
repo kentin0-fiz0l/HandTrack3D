@@ -10,14 +10,28 @@ import { HandMesh } from './HandMesh';
 import { HandSkeleton } from '@/components/HandSkeleton/HandSkeleton';
 import { InteractiveObject } from './InteractiveObject';
 import { PerformanceTracker } from '@/components/PerformanceMonitor/PerformanceTracker';
+import { BuildModeController } from '@/components/BuildMode/BuildModeController';
+import { GhostPreview } from '@/components/BuildMode/GhostPreview';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
 import { useMemo } from 'react';
+import type { SceneObject } from '@/types/scene.types';
 
-export function Scene3D() {
+interface Scene3DProps {
+  selectedType?: SceneObject['type'];
+  selectedColor?: string;
+  selectedSize?: number;
+}
+
+export function Scene3D({
+  selectedType = 'box',
+  selectedColor = '#3b82f6',
+  selectedSize = 1.0,
+}: Scene3DProps) {
   const objects = useSceneStore((state) => state.objects);
   const cursors = useHandCursorStore((state) => state.cursors);
   const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
+  const buildMode = useSceneStore((state) => state.buildMode);
   const hands = useHandTrackingStore((state) => state.hands);
   const { camera, size } = useThree();
 
@@ -102,6 +116,18 @@ export function Scene3D() {
           handedness={skeleton.handedness}
         />
       ))}
+
+      {/* Build mode controller and ghost preview */}
+      {buildMode && (
+        <>
+          <BuildModeController
+            selectedType={selectedType}
+            selectedColor={selectedColor}
+            selectedSize={selectedSize}
+          />
+          <GhostPreview />
+        </>
+      )}
     </>
   );
 }

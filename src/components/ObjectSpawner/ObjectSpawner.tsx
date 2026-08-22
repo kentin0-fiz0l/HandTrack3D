@@ -24,11 +24,32 @@ const PRESET_COLORS = [
   { hex: '#f97316', label: 'Orange' },
 ];
 
-export function ObjectSpawner() {
+interface ObjectSpawnerProps {
+  onSelectionChange?: (type: ObjectType, color: string, size: number) => void;
+}
+
+export function ObjectSpawner({ onSelectionChange }: ObjectSpawnerProps = {}) {
   const [selectedType, setSelectedType] = useState<ObjectType>('box');
   const [size, setSize] = useState(1.0);
   const [color, setColor] = useState('#3b82f6');
   const addObject = useSceneStore((state) => state.addObject);
+  const buildMode = useSceneStore((state) => state.buildMode);
+  const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+
+  const handleTypeChange = (type: ObjectType) => {
+    setSelectedType(type);
+    onSelectionChange?.(type, color, size);
+  };
+
+  const handleSizeChange = (newSize: number) => {
+    setSize(newSize);
+    onSelectionChange?.(selectedType, color, newSize);
+  };
+
+  const handleColorChange = (newColor: string) => {
+    setColor(newColor);
+    onSelectionChange?.(selectedType, newColor, size);
+  };
 
   const handleSpawn = () => {
     // Generate unique ID
@@ -57,7 +78,25 @@ export function ObjectSpawner() {
 
   return (
     <div className="absolute top-20 right-4 bg-black/70 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl max-w-xs z-20">
-      <h3 className="text-lg font-semibold mb-3 text-white">Object Spawner</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-white">Object Spawner</h3>
+        <button
+          onClick={toggleBuildMode}
+          className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+            buildMode
+              ? 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+          }`}
+        >
+          {buildMode ? 'Build Mode: ON' : 'Build Mode: OFF'}
+        </button>
+      </div>
+
+      {buildMode && (
+        <div className="mb-3 p-2 bg-green-900/30 border border-green-600/50 rounded text-xs text-green-200">
+          Click anywhere to place objects. Press <strong>B</strong> to exit.
+        </div>
+      )}
 
       {/* Object Type Selection */}
       <div className="mb-4">
@@ -66,7 +105,7 @@ export function ObjectSpawner() {
           {OBJECT_TYPES.map(({ type, label }) => (
             <button
               key={type}
-              onClick={() => setSelectedType(type)}
+              onClick={() => handleTypeChange(type)}
               className={`px-3 py-2 text-xs rounded transition-colors ${
                 selectedType === type
                   ? 'bg-blue-600 text-white'
@@ -90,7 +129,7 @@ export function ObjectSpawner() {
           max="3.0"
           step="0.1"
           value={size}
-          onChange={(e) => setSize(parseFloat(e.target.value))}
+          onChange={(e) => handleSizeChange(parseFloat(e.target.value))}
           className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
         />
       </div>
@@ -102,7 +141,7 @@ export function ObjectSpawner() {
           {PRESET_COLORS.map(({ hex, label }) => (
             <button
               key={hex}
-              onClick={() => setColor(hex)}
+              onClick={() => handleColorChange(hex)}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
                 color === hex ? 'border-white scale-110' : 'border-gray-600 hover:scale-105'
               }`}
@@ -116,13 +155,13 @@ export function ObjectSpawner() {
           <input
             type="color"
             value={color}
-            onChange={(e) => setColor(e.target.value)}
+            onChange={(e) => handleColorChange(e.target.value)}
             className="w-12 h-8 rounded cursor-pointer bg-gray-700 border border-gray-600"
           />
           <input
             type="text"
             value={color}
-            onChange={(e) => setColor(e.target.value)}
+            onChange={(e) => handleColorChange(e.target.value)}
             className="flex-1 px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
             placeholder="#3b82f6"
           />
@@ -130,15 +169,19 @@ export function ObjectSpawner() {
       </div>
 
       {/* Spawn Button */}
-      <button
-        onClick={handleSpawn}
-        className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg"
-      >
-        Spawn Object
-      </button>
+      {!buildMode && (
+        <button
+          onClick={handleSpawn}
+          className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg"
+        >
+          Spawn Object
+        </button>
+      )}
 
       <p className="mt-3 text-xs text-gray-400 text-center">
-        Objects spawn in front of the camera
+        {buildMode
+          ? 'Click in the scene to place objects'
+          : 'Objects spawn in front of the camera'}
       </p>
     </div>
   );

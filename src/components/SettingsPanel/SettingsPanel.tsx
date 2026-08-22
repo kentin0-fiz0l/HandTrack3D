@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useTutorialStore } from '@/stores/tutorialStore';
 import { SettingSlider } from '@/components/ui/SettingSlider';
 import { SettingToggle } from '@/components/ui/SettingToggle';
 import { SceneTemplates } from '@/components/SceneTemplates/SceneTemplates';
 import { updateMediaPipeOptions } from '@/services/mediapipeService';
+import { PRESETS } from '@/data/settingsPresets';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ type TabType = 'scene' | 'gestures' | 'physics' | 'tracking' | 'visual';
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('scene');
   const settings = useSettingsStore();
+  const { resetTutorial } = useTutorialStore();
 
   // Handle ESC key to close
   useEffect(() => {
@@ -33,6 +36,15 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     if (isOpen) return; // Don't reinitialize while panel is open
     updateMediaPipeOptions();
   }, [settings.maxHands, settings.detectionConfidence, settings.trackingConfidence, isOpen]);
+
+  // Apply preset and reinitialize MediaPipe
+  const handlePresetSelect = (presetId: string) => {
+    const preset = PRESETS.find((p) => p.id === presetId);
+    if (preset) {
+      settings.applyPreset(preset);
+      // MediaPipe will reinitialize via the useEffect above
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -75,6 +87,41 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 ✕
               </button>
             </div>
+          </div>
+
+          {/* Preset Selector */}
+          <div className="px-6 py-4 border-b border-white/20 bg-gray-800/30">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-300">Quick Presets</h3>
+              {settings.currentPreset === null && (
+                <span className="px-2 py-0.5 text-xs bg-primary-500/20 text-primary-400 rounded">
+                  Custom
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => handlePresetSelect(preset.id)}
+                  className={`
+                    px-3 py-2 rounded-lg text-sm font-medium transition
+                    ${
+                      settings.currentPreset === preset.id
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }
+                  `}
+                  title={preset.description}
+                >
+                  <div className="text-lg mb-1">{preset.icon}</div>
+                  <div className="text-xs">{preset.name}</div>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Changes to individual settings will switch to Custom mode
+            </p>
           </div>
 
           {/* Tabs */}
@@ -262,6 +309,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             />
 
             <SettingToggle
+              label="Show Grab Range"
+              checked={settings.showGrabRange}
+              onChange={(checked) => settings.updateVisualSetting('showGrabRange', checked)}
+              description="Show grab range visualization spheres around hands"
+            />
+
+            <SettingToggle
               label="Show Hand Skeleton"
               checked={settings.showHandSkeleton}
               onChange={(checked) => settings.updateVisualSetting('showHandSkeleton', checked)}
@@ -281,6 +335,22 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               onChange={(checked) => settings.updateVisualSetting('showWebcam', checked)}
               description="Show debug webcam preview"
             />
+
+            {/* Replay Tutorial Button */}
+            <div className="pt-4 border-t border-white/20">
+              <button
+                onClick={() => {
+                  resetTutorial();
+                  onClose();
+                }}
+                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition font-medium"
+              >
+                🎓 Replay Tutorial
+              </button>
+              <p className="text-xs text-gray-500 mt-2">
+                Restart the interactive tutorial from the beginning
+              </p>
+            </div>
               </div>
             )}
           </div>

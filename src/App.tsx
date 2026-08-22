@@ -5,15 +5,36 @@ import { ControlPanel } from './components/ControlPanel/ControlPanel';
 import { SettingsPanel } from './components/SettingsPanel/SettingsPanel';
 import { ObjectSpawner } from './components/ObjectSpawner/ObjectSpawner';
 import { PerformanceMonitor } from './components/PerformanceMonitor/PerformanceMonitor';
+import { GestureStatusWidget } from './components/GestureStatusWidget/GestureStatusWidget';
+import { ObjectPropertyEditor } from './components/ObjectPropertyEditor';
+import { HintsManager } from './components/Hints';
+import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useSceneStore } from './stores/sceneStore';
+import type { SceneObject } from './types/scene.types';
 
 function App() {
   const [showPanel, setShowPanel] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedType, setSelectedType] = useState<SceneObject['type']>('box');
+  const [selectedColor, setSelectedColor] = useState('#3b82f6');
+  const [selectedSize, setSelectedSize] = useState(1.0);
+  const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+
+  const handleSelectionChange = (
+    type: SceneObject['type'],
+    color: string,
+    size: number
+  ) => {
+    setSelectedType(type);
+    setSelectedColor(color);
+    setSelectedSize(size);
+  };
 
   useKeyboardShortcuts({
     onTogglePanel: () => setShowPanel((prev) => !prev),
     onToggleSettings: () => setShowSettings((prev) => !prev),
+    onToggleBuildMode: toggleBuildMode,
   });
 
   return (
@@ -60,13 +81,29 @@ function App() {
       <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       {/* Object Spawner */}
-      <ObjectSpawner />
+      <ObjectSpawner onSelectionChange={handleSelectionChange} />
 
       {/* Performance Monitor */}
       <PerformanceMonitor />
 
+      {/* Gesture Status Widget */}
+      <GestureStatusWidget />
+
+      {/* Object Property Editor */}
+      <ObjectPropertyEditor />
+
+      {/* Hints Manager */}
+      <HintsManager />
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay />
+
       {/* 3D Canvas */}
-      <HandTrackingCanvas />
+      <HandTrackingCanvas
+        selectedType={selectedType}
+        selectedColor={selectedColor}
+        selectedSize={selectedSize}
+      />
 
       {/* Webcam Feed */}
       <WebcamFeed showPreview={true} />
@@ -78,8 +115,10 @@ function App() {
           <li>• <strong>Pinch</strong> near object to grab</li>
           <li>• <strong>Move hand</strong> to drag object</li>
           <li>• <strong>Open hand</strong> to release</li>
+          <li>• <strong>Right-click</strong> object to edit properties</li>
           <li>• Press <strong>H</strong> to toggle status panel</li>
           <li>• Press <strong>S</strong> to open settings</li>
+          <li>• Press <strong>B</strong> to toggle build mode</li>
         </ul>
         <div className="mt-3 pt-3 border-t border-white/20">
           <h4 className="font-semibold mb-1 text-xs">Camera Controls</h4>

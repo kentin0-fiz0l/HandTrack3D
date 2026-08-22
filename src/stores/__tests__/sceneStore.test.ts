@@ -33,6 +33,10 @@ describe('sceneStore', () => {
         },
       ],
       grabbedObjects: new Map(),
+      objectProperties: new Map(),
+      selectedObjectId: null,
+      buildMode: false,
+      ghostPreview: null,
     });
   });
 
@@ -199,6 +203,180 @@ describe('sceneStore', () => {
     it('should handle non-existent object', () => {
       const { isObjectGrabbed } = useSceneStore.getState();
       expect(isObjectGrabbed('non-existent')).toBe(false);
+    });
+  });
+
+  describe('Per-object properties', () => {
+    describe('setObjectProperty', () => {
+      it('should set individual property on object', () => {
+        const { setObjectProperty, getObjectProperty } = useSceneStore.getState();
+        setObjectProperty('box-1', 'mass', 2.5);
+        expect(getObjectProperty('box-1', 'mass')).toBe(2.5);
+      });
+
+      it('should set multiple properties independently', () => {
+        const { setObjectProperty, getObjectProperty } = useSceneStore.getState();
+        setObjectProperty('box-1', 'mass', 2.5);
+        setObjectProperty('box-1', 'friction', 0.9);
+        expect(getObjectProperty('box-1', 'mass')).toBe(2.5);
+        expect(getObjectProperty('box-1', 'friction')).toBe(0.9);
+      });
+
+      it('should not affect properties of other objects', () => {
+        const { setObjectProperty, getObjectProperty } = useSceneStore.getState();
+        setObjectProperty('box-1', 'mass', 2.5);
+        expect(getObjectProperty('sphere-1', 'mass')).toBe(1.0); // Default
+      });
+    });
+
+    describe('getObjectProperty', () => {
+      it('should return default value for unset property', () => {
+        const { getObjectProperty } = useSceneStore.getState();
+        expect(getObjectProperty('box-1', 'mass')).toBe(1.0);
+      });
+
+      it('should return custom value after setting', () => {
+        const { setObjectProperty, getObjectProperty } = useSceneStore.getState();
+        setObjectProperty('box-1', 'restitution', 0.8);
+        expect(getObjectProperty('box-1', 'restitution')).toBe(0.8);
+      });
+    });
+
+    describe('getObjectProperties', () => {
+      it('should return default properties for object without custom properties', () => {
+        const { getObjectProperties } = useSceneStore.getState();
+        const props = getObjectProperties('box-1');
+        expect(props.mass).toBe(1.0);
+        expect(props.friction).toBe(0.7);
+        expect(props.restitution).toBe(0.5);
+      });
+
+      it('should return merged properties after setting custom values', () => {
+        const { setObjectProperty, getObjectProperties } = useSceneStore.getState();
+        setObjectProperty('box-1', 'mass', 3.0);
+        setObjectProperty('box-1', 'locked', true);
+
+        const props = getObjectProperties('box-1');
+        expect(props.mass).toBe(3.0);
+        expect(props.locked).toBe(true);
+        expect(props.friction).toBe(0.7); // Still default
+      });
+    });
+
+    describe('resetObjectProperties', () => {
+      it('should reset all properties to defaults', () => {
+        const { setObjectProperty, resetObjectProperties, getObjectProperties } =
+          useSceneStore.getState();
+
+        setObjectProperty('box-1', 'mass', 5.0);
+        setObjectProperty('box-1', 'friction', 0.9);
+        setObjectProperty('box-1', 'locked', true);
+
+        resetObjectProperties('box-1');
+
+        const props = getObjectProperties('box-1');
+        expect(props.mass).toBe(1.0);
+        expect(props.friction).toBe(0.7);
+        expect(props.locked).toBe(false);
+      });
+    });
+
+    describe('addObject', () => {
+      it('should initialize properties for new object', () => {
+        const { addObject, getObjectProperties } = useSceneStore.getState();
+        const newObject = {
+          id: 'new-box',
+          type: 'box' as const,
+          position: [0, 0, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: 1,
+          color: '#ff0000',
+        };
+
+        addObject(newObject);
+
+        const props = getObjectProperties('new-box');
+        expect(props.mass).toBe(1.0);
+        expect(props.color).toBe('#ff0000');
+      });
+
+      it('should enforce MAX_OBJECTS limit', () => {
+        const { addObject } = useSceneStore.getState();
+        const initialCount = useSceneStore.getState().objects.length;
+
+        // Try to add 50+ objects
+        for (let i = 0; i < 50; i++) {
+          addObject({
+            id: `test-${i}`,
+            type: 'box',
+            position: [0, 0, 0],
+            rotation: [0, 0, 0],
+            scale: 1,
+            color: '#ffffff',
+          });
+        }
+
+        const state = useSceneStore.getState();
+        expect(state.objects.length).toBeLessThanOrEqual(50);
+      });
+    });
+
+    describe('removeObject', () => {
+      it('should remove object and its properties', () => {
+        const { addObject, setObjectProperty, removeObject, getObjectProperties } =
+          useSceneStore.getState();
+
+        addObject({
+          id: 'temp-box',
+          type: 'box',
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          scale: 1,
+          color: '#00ff00',
+        });
+
+        setObjectProperty('temp-box', 'mass', 10.0);
+        removeObject('temp-box');
+
+        const state = useSceneStore.getState();
+        expect(state.objects.find((obj) => obj.id === 'temp-box')).toBeUndefined();
+
+        // Properties should return to defaults (not stored in Map)
+        const props = getObjectProperties('temp-box');
+        expect(props.mass).toBe(1.0); // Default, not custom value
+      });
+
+      it('should deselect object if it was selected', () => {
+        const { selectObject, removeObject } = useSceneStore.getState();
+
+        selectObject('box-1');
+        expect(useSceneStore.getState().selectedObjectId).toBe('box-1');
+
+        removeObject('box-1');
+        expect(useSceneStore.getState().selectedObjectId).toBeNull();
+      });
+    });
+
+    describe('selectObject', () => {
+      it('should select object', () => {
+        const { selectObject } = useSceneStore.getState();
+        selectObject('box-1');
+        expect(useSceneStore.getState().selectedObjectId).toBe('box-1');
+      });
+
+      it('should deselect when passed null', () => {
+        const { selectObject } = useSceneStore.getState();
+        selectObject('box-1');
+        selectObject(null);
+        expect(useSceneStore.getState().selectedObjectId).toBeNull();
+      });
+
+      it('should change selection', () => {
+        const { selectObject } = useSceneStore.getState();
+        selectObject('box-1');
+        selectObject('sphere-1');
+        expect(useSceneStore.getState().selectedObjectId).toBe('sphere-1');
+      });
     });
   });
 });

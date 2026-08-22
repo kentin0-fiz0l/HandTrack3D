@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { SettingsPreset } from '@/data/settingsPresets';
 
 interface SettingsStore {
   // Gesture Settings
@@ -25,9 +26,14 @@ interface SettingsStore {
   showWebcam: boolean; // Toggle debug webcam preview
   showHandSkeleton: boolean; // Toggle hand skeleton visualization
   showPerformance: boolean; // Toggle performance monitoring dashboard
+  showGrabRange: boolean; // Toggle grab range visualization spheres
+
+  // Current preset (null if custom)
+  currentPreset: string | null;
 
   // Actions
   reset: () => void;
+  applyPreset: (preset: SettingsPreset) => void;
   updateGestureSetting: <K extends keyof Pick<SettingsStore, 'pinchThreshold' | 'fingerExtensionAngle' | 'fistCurlThreshold' | 'pointExtensionAngle' | 'swipeVelocityThreshold' | 'swipeCooldown'>>(
     key: K,
     value: SettingsStore[K]
@@ -40,7 +46,7 @@ interface SettingsStore {
     key: K,
     value: SettingsStore[K]
   ) => void;
-  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance'>>(
+  updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -72,35 +78,57 @@ const DEFAULT_SETTINGS = {
   showWebcam: false,
   showHandSkeleton: true,
   showPerformance: true,
+  showGrabRange: true,
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
   ...DEFAULT_SETTINGS,
+  currentPreset: 'balanced', // Default preset
 
-  reset: () => set(DEFAULT_SETTINGS),
+  reset: () => set({ ...DEFAULT_SETTINGS, currentPreset: 'balanced' }),
+
+  applyPreset: (preset: SettingsPreset) =>
+    set({
+      ...preset.settings,
+      // Visual settings are not affected by presets
+      showTrails: true,
+      showWebcam: false,
+      showHandSkeleton: true,
+      showPerformance: true,
+      showGrabRange: true,
+      // Physics boolean settings not affected by presets
+      gravityEnabled: true,
+      // Tracking maxHands not affected by presets
+      maxHands: 2,
+      currentPreset: preset.id,
+    }),
 
   updateGestureSetting: (key, value) =>
     set((state) => ({
       ...state,
       [key]: value,
+      currentPreset: null, // Mark as custom when manually changed
     })),
 
   updatePhysicsSetting: (key, value) =>
     set((state) => ({
       ...state,
       [key]: value,
+      currentPreset: null, // Mark as custom when manually changed
     })),
 
   updateTrackingSetting: (key, value) =>
     set((state) => ({
       ...state,
       [key]: value,
+      currentPreset: null, // Mark as custom when manually changed
     })),
 
   updateVisualSetting: (key, value) =>
     set((state) => ({
       ...state,
       [key]: value,
+      // Visual settings don't affect preset status
     })),
 }));
 

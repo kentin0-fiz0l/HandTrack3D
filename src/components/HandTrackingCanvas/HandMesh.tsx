@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { Trail } from '@react-three/drei';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { GrabRangeSphere } from './GrabRangeSphere';
 import * as THREE from 'three';
 import type { GestureType } from '@/types/gesture.types';
 
@@ -18,6 +19,7 @@ export function HandMesh({ position, handedness, handId }: HandMeshProps) {
   const targetPosition = useRef(new THREE.Vector3());
   const gestures = useGestureStore((state) => state.gestures);
   const showTrails = useSettingsStore((state) => state.showTrails);
+  const showGrabRange = useSettingsStore((state) => state.showGrabRange);
 
   // Get current gesture for this hand
   const currentGesture = useMemo(() => {
@@ -50,18 +52,24 @@ export function HandMesh({ position, handedness, handId }: HandMeshProps) {
   });
 
   const meshContent = (
-    <mesh ref={meshRef} position={position} scale={scale}>
-      <sphereGeometry args={[1, 16, 16]} />
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={emissiveIntensity}
-        transparent
-        opacity={0.8}
-      />
-      {/* Glow effect */}
-      <pointLight color={color} intensity={emissiveIntensity * 2} distance={2} />
-    </mesh>
+    <>
+      {/* Grab range visualization */}
+      {showGrabRange && <GrabRangeSphere position={position} handId={handId} />}
+
+      {/* Hand cursor */}
+      <mesh ref={meshRef} position={position} scale={scale}>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={emissiveIntensity}
+          transparent
+          opacity={0.8}
+        />
+        {/* Glow effect */}
+        <pointLight color={color} intensity={emissiveIntensity * 2} distance={2} />
+      </mesh>
+    </>
   );
 
   return showTrails ? (

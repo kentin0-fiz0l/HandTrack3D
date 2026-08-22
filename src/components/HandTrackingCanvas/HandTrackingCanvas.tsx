@@ -1,7 +1,18 @@
 import { Canvas } from '@react-three/fiber';
 import { Scene3D } from './Scene3D';
+import type { SceneObject } from '@/types/scene.types';
 
-export function HandTrackingCanvas() {
+interface HandTrackingCanvasProps {
+  selectedType?: SceneObject['type'];
+  selectedColor?: string;
+  selectedSize?: number;
+}
+
+export function HandTrackingCanvas({
+  selectedType,
+  selectedColor,
+  selectedSize,
+}: HandTrackingCanvasProps) {
   return (
     <div className="w-full h-screen">
       <Canvas
@@ -12,7 +23,11 @@ export function HandTrackingCanvas() {
         }}
         shadows
       >
-        <Scene3D />
+        <Scene3D
+          selectedType={selectedType}
+          selectedColor={selectedColor}
+          selectedSize={selectedSize}
+        />
       </Canvas>
     </div>
   );
