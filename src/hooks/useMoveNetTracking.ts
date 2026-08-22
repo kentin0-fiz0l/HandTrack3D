@@ -17,6 +17,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
   const setIsTracking = usePoseTrackingStore((state) => state.setIsTracking);
   const setError = usePoseTrackingStore((state) => state.setError);
   const setInitializing = usePoseTrackingStore((state) => state.setInitializing);
+  const setLoadingStage = usePoseTrackingStore((state) => state.setLoadingStage);
   const detectionConfidence = useSettingsStore((state) => state.detectionConfidence);
 
   useEffect(() => {
@@ -27,10 +28,13 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
 
     console.log('[MoveNet] Initializing pose detector...');
     setInitializing(true);
+    setLoadingStage('initializing');
 
     // Initialize MoveNet detector
     const initializeDetector = async () => {
       try {
+        // Stage 1: Backend initialization
+        setLoadingStage('backend_init');
         // Set backend to WebGL explicitly BEFORE calling ready()
         // This ensures TensorFlow doesn't try to initialize webgpu first
         await tf.setBackend('webgl');
@@ -38,6 +42,8 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
         // Wait for TensorFlow.js backend to be ready
         await tf.ready();
 
+        // Stage 2: Model download
+        setLoadingStage('model_download');
         const detector = await poseDetection.createDetector(
           poseDetection.SupportedModels.MoveNet,
           {
@@ -51,9 +57,18 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
           return;
         }
 
+        // Stage 3: Model ready
+        setLoadingStage('model_ready');
         detectorRef.current = detector;
+
+        // Stage 4: Complete
+        setLoadingStage('complete');
         setIsReady(true);
         setInitializing(false);
+
+        // Clear loading stage after a brief delay
+        setTimeout(() => setLoadingStage(null), 500);
+
         console.log('[MoveNet] Pose detector initialized successfully');
 
         // Start detection loop with FPS decoupling
@@ -122,6 +137,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
       } catch (error) {
         console.error('[MoveNet] Failed to initialize pose detector:', error);
         setInitializing(false);
+        setLoadingStage(null);
         setError({
           message: error instanceof Error ? error.message : 'Failed to initialize pose tracking',
           code: 'INITIALIZATION_ERROR',

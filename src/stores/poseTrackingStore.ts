@@ -19,15 +19,24 @@ export interface TrackingError {
   recoverable: boolean;
 }
 
+export type LoadingStage =
+  | 'initializing'
+  | 'backend_init'
+  | 'model_download'
+  | 'model_ready'
+  | 'complete';
+
 interface PoseTrackingStore {
   pose: PoseData | null;
   isTracking: boolean;
   error: TrackingError | null;
   isInitializing: boolean;
+  loadingStage: LoadingStage | null;
   setPose: (pose: PoseData | null) => void;
   setIsTracking: (isTracking: boolean) => void;
   setError: (error: TrackingError | null) => void;
   setInitializing: (isInitializing: boolean) => void;
+  setLoadingStage: (stage: LoadingStage | null) => void;
   clearError: () => void;
 }
 
@@ -36,10 +45,12 @@ export const usePoseTrackingStore = create<PoseTrackingStore>((set) => ({
   isTracking: false,
   error: null,
   isInitializing: false,
+  loadingStage: null,
   setPose: (pose) => set({ pose, error: null }), // Clear error on successful update
   setIsTracking: (isTracking) => set({ isTracking }),
   setError: (error) => set({ error }),
   setInitializing: (isInitializing) => set({ isInitializing }),
+  setLoadingStage: (loadingStage) => set({ loadingStage }),
   clearError: () => set({ error: null }),
 }));
 

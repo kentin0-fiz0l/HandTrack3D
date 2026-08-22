@@ -11,9 +11,11 @@ import { HintsManager } from './components/Hints';
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { DepthBreakdownPanel } from './components/Debug/DepthBreakdownPanel';
 import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDisplay';
+import { LoadingOverlay } from './components/Loading/LoadingOverlay';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSceneStore } from './stores/sceneStore';
 import { useSettingsStore } from './stores/settingsStore';
+import { usePoseTrackingStore } from './stores/poseTrackingStore';
 import type { SceneObject } from './types/scene.types';
 
 function App() {
@@ -28,6 +30,10 @@ function App() {
   const showDepthBreakdown = useSettingsStore((state) => state.showDepthBreakdown);
   const showPoseSkeleton = useSettingsStore((state) => state.showPoseSkeleton);
   const updateVisualSetting = useSettingsStore((state) => state.updateVisualSetting);
+
+  // Loading state
+  const poseLoadingStage = usePoseTrackingStore((state) => state.loadingStage);
+  const poseInitializing = usePoseTrackingStore((state) => state.isInitializing);
 
   const handleSelectionChange = (
     type: SceneObject['type'],
@@ -113,6 +119,13 @@ function App() {
 
       {/* Tracking Error Display */}
       <TrackingErrorDisplay onRetry={() => window.location.reload()} />
+
+      {/* Loading Overlay */}
+      <LoadingOverlay
+        isLoading={poseInitializing}
+        stage={poseLoadingStage || 'initializing'}
+        modelName="Pose Tracking"
+      />
 
       {/* 3D Canvas */}
       <HandTrackingCanvas
