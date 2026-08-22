@@ -30,6 +30,9 @@ interface SettingsStore {
   showPoseSkeleton: boolean; // Toggle pose/body skeleton overlay (MoveNet)
   showDepthBreakdown: boolean; // Toggle depth calculation debug panel
 
+  // Performance Settings
+  poseTrackingEnabled: boolean; // Toggle pose tracking (disable for better performance)
+
   // Current preset (null if custom)
   currentPreset: string | null;
 
@@ -49,6 +52,10 @@ interface SettingsStore {
     value: SettingsStore[K]
   ) => void;
   updateVisualSetting: <K extends keyof Pick<SettingsStore, 'showTrails' | 'showWebcam' | 'showHandSkeleton' | 'showPerformance' | 'showGrabRange' | 'showPoseSkeleton' | 'showDepthBreakdown'>>(
+    key: K,
+    value: SettingsStore[K]
+  ) => void;
+  updatePerformanceSetting: <K extends keyof Pick<SettingsStore, 'poseTrackingEnabled'>>(
     key: K,
     value: SettingsStore[K]
   ) => void;
@@ -83,6 +90,9 @@ const DEFAULT_SETTINGS = {
   showGrabRange: true,
   showPoseSkeleton: false, // Debug: pose skeleton overlay
   showDepthBreakdown: false, // Debug: depth calculation panel
+
+  // Performance
+  poseTrackingEnabled: true, // Enable pose tracking (disable for better performance on slow devices)
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
@@ -135,6 +145,13 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       ...state,
       [key]: value,
       // Visual settings don't affect preset status
+    })),
+
+  updatePerformanceSetting: (key, value) =>
+    set((state) => ({
+      ...state,
+      [key]: value,
+      // Performance settings don't affect preset status
     })),
 }));
 

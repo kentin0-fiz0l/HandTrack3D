@@ -12,6 +12,7 @@ import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { DepthBreakdownPanel } from './components/Debug/DepthBreakdownPanel';
 import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDisplay';
 import { LoadingOverlay } from './components/Loading/LoadingOverlay';
+import { PerformanceWarning } from './components/Performance/PerformanceWarning';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSceneStore } from './stores/sceneStore';
 import { useSettingsStore } from './stores/settingsStore';
@@ -101,6 +102,9 @@ function App() {
 
       {/* Performance Monitor */}
       <PerformanceMonitor />
+
+      {/* Performance Warning */}
+      <PerformanceWarning />
 
       {/* Gesture Status Widget */}
       <GestureStatusWidget />

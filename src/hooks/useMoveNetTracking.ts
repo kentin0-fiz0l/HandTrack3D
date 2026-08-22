@@ -19,9 +19,16 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
   const setInitializing = usePoseTrackingStore((state) => state.setInitializing);
   const setLoadingStage = usePoseTrackingStore((state) => state.setLoadingStage);
   const detectionConfidence = useSettingsStore((state) => state.detectionConfidence);
+  const poseTrackingEnabled = useSettingsStore((state) => state.poseTrackingEnabled);
 
   useEffect(() => {
-    if (!videoElement) return;
+    // Skip initialization if pose tracking is disabled (performance mode)
+    if (!videoElement || !poseTrackingEnabled) {
+      console.log('[MoveNet] Pose tracking disabled (performance mode)');
+      setPose(null);
+      setIsTracking(false);
+      return;
+    }
 
     let rafId: number;
     let isActive = true;
@@ -165,7 +172,7 @@ export function useMoveNetTracking(videoElement: HTMLVideoElement | null) {
       setIsReady(false);
       console.log('[MoveNet] Pose detector disposed');
     };
-  }, [videoElement, setPose, setIsTracking, detectionConfidence]);
+  }, [videoElement, setPose, setIsTracking, detectionConfidence, poseTrackingEnabled, setError, setInitializing, setLoadingStage]);
 
   return detectorRef.current;
 }
