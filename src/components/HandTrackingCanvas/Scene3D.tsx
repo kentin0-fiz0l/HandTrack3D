@@ -47,7 +47,15 @@ export function Scene3D({
       id: hand.id,
       handedness: hand.handedness,
       landmarks: hand.landmarks.map((lm) =>
-        mapHandTo3D(lm, camera, size.width, size.height)
+        mapHandTo3D(
+          lm,
+          hand.landmarks,   // All landmarks for hand size calculation
+          hand.id,          // Hand ID for smoothing
+          hand.handedness,  // Handedness for arm extension from pose
+          camera,
+          size.width,
+          size.height
+        )
       ),
     }));
   }, [hands, camera, size.width, size.height]);

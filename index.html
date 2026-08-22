@@ -5,9 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HandTrack3D - Webcam Hand Tracking</title>
-    <!-- MediaPipe Hands CDN -->
-    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <!-- MediaPipe CDN -->
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js"></script>
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"></script>
+    <!-- Pose tracking disabled due to CDN loading issues -->
+    <!-- <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/pose.js"></script> -->
+    <!-- <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js"></script> -->
   </head>
   <body>
     <div id="root"></div>

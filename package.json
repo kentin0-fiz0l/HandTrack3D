@@ -16,6 +16,10 @@
     "release": "turbo run build && changeset publish"
   },
   "dependencies": {
+    "@handtrack3d/core": "workspace:*",
+    "@handtrack3d/rapier": "workspace:*",
+    "@handtrack3d/react": "workspace:*",
+    "@handtrack3d/three": "workspace:*",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "@react-three/rapier": "^2.2.0",
