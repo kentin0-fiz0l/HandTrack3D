@@ -1,6 +1,6 @@
 import { useWebcam } from '@/hooks/useWebcam';
 import { useHandTracking } from '@/hooks/useHandTracking';
-import { useBodyTracking } from '@/hooks/useBodyTracking';
+import { useMoveNetTracking } from '@/hooks/useMoveNetTracking';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { HandOverlay } from './HandOverlay';
 
@@ -18,10 +18,8 @@ export function WebcamFeed({ showPreview = true }: WebcamFeedProps) {
   // Initialize hand tracking
   useHandTracking(videoRef.current, isReady);
 
-  // Initialize body/pose tracking for depth context
-  // DISABLED: MediaPipe Pose has CDN loading issues. Depth estimation currently uses hand size (50%) + MediaPipe Z (20%)
-  // TODO: Re-enable with proper npm package setup or alternative body tracking solution
-  // useBodyTracking(videoRef.current);
+  // Initialize body/pose tracking for depth context using MoveNet
+  useMoveNetTracking(videoRef.current);
 
   if (error) {
     return (

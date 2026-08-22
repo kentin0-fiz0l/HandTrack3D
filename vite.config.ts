@@ -8,7 +8,17 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Stub out @mediapipe/pose since we're only using MoveNet
+      '@mediapipe/pose': path.resolve(__dirname, './src/stubs/mediapipe-pose-stub.ts'),
     },
+  },
+  optimizeDeps: {
+    exclude: ['@mediapipe/pose'],
+    include: [
+      '@tensorflow/tfjs',
+      '@tensorflow/tfjs-backend-webgl',
+      '@tensorflow-models/pose-detection',
+    ],
   },
   server: {
     port: 5173,
