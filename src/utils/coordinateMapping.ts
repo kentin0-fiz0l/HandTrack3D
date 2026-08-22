@@ -43,7 +43,61 @@ function calculateHandSize(landmarks: HandLandmark[]): number {
 }
 
 /**
- * Calculate arm extension factor from pose landmarks
+ * Calculate the angle at the elbow joint
+ * Returns angle in degrees (0° = fully extended, 180° = fully bent)
+ */
+function calculateElbowAngle(
+  shoulder: { x: number; y: number; z?: number },
+  elbow: { x: number; y: number; z?: number },
+  wrist: { x: number; y: number; z?: number }
+): number {
+  // Create vectors from elbow to shoulder and elbow to wrist
+  const upperArm = {
+    x: shoulder.x - elbow.x,
+    y: shoulder.y - elbow.y,
+    z: (shoulder.z || 0) - (elbow.z || 0),
+  };
+
+  const forearm = {
+    x: wrist.x - elbow.x,
+    y: wrist.y - elbow.y,
+    z: (wrist.z || 0) - (elbow.z || 0),
+  };
+
+  // Calculate dot product
+  const dotProduct = upperArm.x * forearm.x + upperArm.y * forearm.y + upperArm.z * forearm.z;
+
+  // Calculate magnitudes
+  const upperArmMag = Math.sqrt(
+    upperArm.x * upperArm.x + upperArm.y * upperArm.y + upperArm.z * upperArm.z
+  );
+  const forearmMag = Math.sqrt(
+    forearm.x * forearm.x + forearm.y * forearm.y + forearm.z * forearm.z
+  );
+
+  // Avoid division by zero
+  if (upperArmMag < 0.01 || forearmMag < 0.01) return 90; // Default to neutral
+
+  // Calculate angle using dot product formula: cos(θ) = (a · b) / (|a| × |b|)
+  const cosAngle = dotProduct / (upperArmMag * forearmMag);
+
+  // Clamp to valid range for acos
+  const clampedCos = Math.max(-1, Math.min(1, cosAngle));
+
+  // Convert to degrees
+  const angleRadians = Math.acos(clampedCos);
+  const angleDegrees = (angleRadians * 180) / Math.PI;
+
+  return angleDegrees;
+}
+
+/**
+ * Calculate arm extension factor from pose landmarks (IMPROVED with angle detection)
+ *
+ * Uses hybrid approach combining:
+ * 1. Distance ratio (shoulder-wrist vs bent arm length)
+ * 2. Elbow angle (straight arm = extended, bent arm = not extended)
+ *
  * Returns a value from 0 (arm bent/close to body) to 1 (arm fully extended forward)
  * Returns 0.5 (neutral) if pose tracking is unavailable
  */
@@ -70,8 +124,7 @@ function calculateArmExtension(handX: number, handedness: 'Left' | 'Right'): num
       return 0.5; // Default if body not visible
     }
 
-    // Calculate arm extension as the ratio of shoulder-wrist distance to shoulder-elbow + elbow-wrist
-    // When arm is bent, this ratio is closer to 1. When extended forward, it's larger.
+    // METHOD 1: Distance-based extension (original approach)
     const shoulderToWrist = Math.sqrt(
       Math.pow(wrist.x - shoulder.x, 2) +
       Math.pow(wrist.y - shoulder.y, 2) +
@@ -93,13 +146,24 @@ function calculateArmExtension(handX: number, handedness: 'Left' | 'Right'): num
     const bentArmLength = shoulderToElbow + elbowToWrist;
     if (bentArmLength < 0.01) return 0.5; // Avoid division by zero
 
-    // Normalize: 1.0 = arm bent (close to body), < 1.0 = arm extended forward
-    // We want 0 = bent, 1 = extended, so we invert and clamp
-    const extensionRatio = shoulderToWrist / bentArmLength;
+    const distanceRatio = shoulderToWrist / bentArmLength;
+    // Map to 0-1 range (0.7 = bent, 0.95+ = extended)
+    const distanceExtension = Math.max(0, Math.min(1, (distanceRatio - 0.7) / 0.25));
 
-    // Map to 0-1 range where 1 is fully extended
-    // Typical bent arm: ratio ~0.7, extended arm: ratio ~0.95+
-    return Math.max(0, Math.min(1, (extensionRatio - 0.7) / 0.25));
+    // METHOD 2: Angle-based extension (NEW - more accurate)
+    const elbowAngle = calculateElbowAngle(shoulder, elbow, wrist);
+
+    // Convert angle to extension factor
+    // Fully bent arm: ~40-60°, Fully extended: ~160-180°
+    // We want: 40° → 0 (bent), 180° → 1 (extended)
+    const angleExtension = Math.max(0, Math.min(1, (elbowAngle - 60) / 120));
+
+    // HYBRID: Combine both methods with weighted average
+    // Distance ratio: 40% weight (good for overall position)
+    // Elbow angle: 60% weight (more reliable indicator of extension)
+    const combinedExtension = 0.4 * distanceExtension + 0.6 * angleExtension;
+
+    return combinedExtension;
   } catch (error) {
     // If pose tracking fails, gracefully fall back to neutral
     console.warn('Arm extension calculation error:', error);
