@@ -6,6 +6,12 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: {
+          400: '#60a5fa', // blue-400
+          500: '#3b82f6', // blue-500
+        },
+      },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
       },
