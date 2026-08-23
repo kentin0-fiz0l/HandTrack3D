@@ -37,14 +37,29 @@ HandTrack3D is both a **modular SDK** and **showcase application** for building 
 - 🧪 **Well Tested** - 40+ unit tests, integration tests, 90%+ coverage
 
 #### Showcase App Features
+
+**Core Functionality**:
 - ✋ **Real-time hand tracking** (30fps) with MediaPipe Hands
 - 🎯 **3D cursor mapping** from 2D hand landmarks to 3D space
-- 👌 **Gesture recognition** (pinch, open hand, fist, point)
+- 👌 **Gesture recognition** (pinch, open hand, fist, point, swipe)
 - 🎮 **Object interaction** (grab, drag, release, throw)
 - 🖐️ **Multi-hand support** (up to 2 hands simultaneously)
-- ⚙️ **Physics simulation** (gravity, collisions, realistic motion)
-- 🎨 **Visual feedback** with color-coded cursors and trails
-- 📊 **Real-time stats** (FPS, hand count, gestures)
+- ⚙️ **Physics simulation** with Rapier (gravity, collisions, realistic motion)
+
+**UX & Onboarding** *(New in v0.3.0-alpha.0)*:
+- 🎓 **Interactive Tutorial** - 6-step guided onboarding for first-time users
+- 💡 **Smart Hints** - Contextual hints that appear based on user behavior
+- 📊 **Gesture Widget** - Real-time gesture confidence display with color-coded bars
+- 🎛️ **Settings Presets** - One-click configurations (Responsive/Balanced/Precise)
+- 🏗️ **Build Mode** - Drag-to-place objects with grid snapping (Press **B**)
+- 🎨 **Property Editor** - Right-click objects to customize physics and visuals
+
+**Visual Feedback**:
+- Color-coded hand cursors (blue = right, green = left)
+- Gesture status widget with emoji icons
+- Grab range visualization
+- Hand trails and skeleton (optional)
+- Selected object highlighting
 
 ---
 
@@ -156,6 +171,54 @@ Navigate to **http://localhost:5173** and allow webcam access.
 4. **Open your hand** (spread all fingers) to release
 5. **Drop or throw** - released objects fall with gravity and can be thrown with velocity
 
+> 💡 **First-time users**: An interactive tutorial will guide you through these steps automatically!
+
+### UX Features *(New in v0.3.0-alpha.0)*
+
+#### Interactive Tutorial
+On your first visit, a 6-step tutorial will guide you through:
+- Webcam setup
+- Hand detection
+- Pinch gesture
+- Grabbing objects
+- Releasing objects
+
+Skip the tutorial anytime or replay it from **Settings → Tutorial → Replay Tutorial**.
+
+#### Gesture Status Widget
+The floating widget (top-left) shows:
+- Current gesture per hand (🤏 pinch, ✊ fist, 👆 point, 🖐️ open)
+- Real-time confidence bars (green >70%, yellow 40-70%, red <40%)
+- Hand identification (blue = right hand, green = left hand)
+- Press **G** to toggle compact mode
+
+#### Settings Presets
+Quickly configure all settings with one click (Settings Panel → Presets):
+- **⚡ Responsive** - Low thresholds, fast gesture detection (demos, quick interactions)
+- **⚖️ Balanced** - Moderate thresholds (default, recommended for most users)
+- **🎯 Precise** - High thresholds, stable detection (accuracy-focused, fewer false positives)
+
+#### Smart Hints
+Contextual hints appear based on your behavior:
+- Timer-based (e.g., "Press H to toggle status panel" after 10s)
+- Action-based (e.g., "Try swipe gestures" after 5 pinches)
+- Session-based (e.g., "Check out Settings Presets" on 2nd session)
+
+All hints auto-dismiss after 8 seconds and only appear once.
+
+#### Build Mode (Press **B**)
+- Click anywhere in the 3D scene to place objects
+- Objects snap to a 0.5-unit grid for precise alignment
+- Ghost preview shows where the object will appear
+- Exit build mode by pressing **B** again
+
+#### Per-Object Customization
+Right-click any object to edit:
+- **Physics**: Mass, bounciness, friction, damping, gravity scale
+- **Visual**: Color, emissive, metalness, roughness
+- **Interaction**: Lock (prevent grabbing), visibility toggle
+- **Actions**: Reset to defaults, delete object
+
 ### Physics Features
 
 - **Gravity** (9.81 m/s²) - Objects fall naturally when released
@@ -168,8 +231,12 @@ Navigate to **http://localhost:5173** and allow webcam access.
 
 | Key | Action |
 |-----|--------|
-| `H` | Toggle status panel |
-| `Space` | Reset camera (planned) |
+| `H` | Toggle status panel (hand tracking stats) |
+| `S` | Open settings panel |
+| `G` | Toggle gesture widget compact mode |
+| `B` | Toggle build mode (drag-to-place objects) |
+| `P` | Toggle pose skeleton visualization (debug) |
+| `D` | Toggle depth breakdown panel (debug) |
 
 ### Camera Controls
 
