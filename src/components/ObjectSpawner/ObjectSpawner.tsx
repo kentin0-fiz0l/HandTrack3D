@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useHintsStore } from '@/stores/hintsStore';
 import type { SceneObject } from '@/types/scene.types';
 
 type ObjectType = SceneObject['type'];
@@ -35,6 +36,7 @@ export function ObjectSpawner({ onSelectionChange }: ObjectSpawnerProps = {}) {
   const addObject = useSceneStore((state) => state.addObject);
   const buildMode = useSceneStore((state) => state.buildMode);
   const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+  const incrementObjectsSpawned = useHintsStore((state) => state.incrementObjectsSpawned);
 
   const handleTypeChange = (type: ObjectType) => {
     setSelectedType(type);
@@ -74,6 +76,7 @@ export function ObjectSpawner({ onSelectionChange }: ObjectSpawnerProps = {}) {
     };
 
     addObject(newObject);
+    incrementObjectsSpawned();
   };
 
   return (

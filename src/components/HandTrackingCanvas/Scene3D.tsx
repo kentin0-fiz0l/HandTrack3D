@@ -7,6 +7,7 @@ import { useGestureRecognition, useGestureStore } from '@/hooks/useGestureRecogn
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useHandTrackingStore } from '@/stores/handTrackingStore';
 import { useTutorialStore } from '@/stores/tutorialStore';
+import { useHintsStore } from '@/stores/hintsStore';
 import { HandMesh } from './HandMesh';
 import { HandSkeleton } from '@/components/HandSkeleton/HandSkeleton';
 import { InteractiveObject } from './InteractiveObject';
@@ -15,7 +16,7 @@ import { BuildModeController } from '@/components/BuildMode/BuildModeController'
 import { GhostPreview } from '@/components/BuildMode/GhostPreview';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import type { SceneObject } from '@/types/scene.types';
 
 interface Scene3DProps {
@@ -39,7 +40,12 @@ export function Scene3D({
   const getNearObjects = useSceneStore((state) => state.getNearObjects);
   const grabRange = useSettingsStore((state) => state.grabRange);
   const updateTutorialState = useTutorialStore((state) => state.updateTutorialState);
+  const incrementGestureCount = useHintsStore((state) => state.incrementGestureCount);
+  const incrementCameraRotations = useHintsStore((state) => state.incrementCameraRotations);
   const { camera, size } = useThree();
+
+  // Track previous gestures to detect changes
+  const prevGesturesRef = useRef<Map<string, string>>(new Map());
 
   // Map hand positions to 3D space
   useHandTo3DMapping();
@@ -54,10 +60,24 @@ export function Scene3D({
   }, [cursors.length, updateTutorialState]);
 
   useEffect(() => {
-    // Track gesture detection
+    // Track gesture detection for tutorial
     const currentGesture = gestures[0]?.gesture || null;
     updateTutorialState({ gestureDetected: currentGesture });
-  }, [gestures, updateTutorialState]);
+
+    // Track gesture counts for hints (only on gesture change)
+    gestures.forEach((gesture) => {
+      const prevGesture = prevGesturesRef.current.get(gesture.handId);
+
+      // Increment count when:
+      // 1. Transitioning from 'none' to a gesture
+      // 2. Transitioning from one gesture to a different gesture
+      if (gesture.gesture !== 'none' && gesture.gesture !== prevGesture) {
+        incrementGestureCount(gesture.gesture);
+      }
+
+      prevGesturesRef.current.set(gesture.handId, gesture.gesture);
+    });
+  }, [gestures, updateTutorialState, incrementGestureCount]);
 
   useEffect(() => {
     // Track near object and grabbed object
@@ -100,12 +120,13 @@ export function Scene3D({
       {/* Performance tracking */}
       <PerformanceTracker />
 
-      {/* Camera controls - disabled rotation for first-person view */}
+      {/* Camera controls */}
       <OrbitControls
         makeDefault
-        enableRotate={false}
-        enablePan={false}
+        enableRotate={true}
+        enablePan={true}
         target={[0, 1.6, -5]} // Look forward
+        onChange={() => incrementCameraRotations()}
       />
 
       {/* Lighting */}

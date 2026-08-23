@@ -1,114 +1,76 @@
-import { useEffect, useState } from 'react';
-import { useHintsStore, type HintType } from '@/stores/hintsStore';
+import { useState, useEffect } from 'react';
+import { useHintsStore } from '@/stores/hintsStore';
+import type { Hint } from '@/data/hints';
 
 interface HintTooltipProps {
-  type: HintType;
-  title: string;
-  message: string;
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  autoHideDelay?: number;
+  hint: Hint;
+  onDismiss: () => void;
 }
 
-const POSITION_CLASSES = {
-  'top-left': 'top-4 left-4',
-  'top-right': 'top-4 right-4',
-  'bottom-left': 'bottom-4 left-4',
-  'bottom-right': 'bottom-4 right-4',
-  center: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-};
-
-export function HintTooltip({
-  type,
-  title,
-  message,
-  position = 'center',
-  autoHideDelay = 8000,
-}: HintTooltipProps) {
-  const shouldShow = useHintsStore((state) => state.shouldShow(type));
-  const markShown = useHintsStore((state) => state.markShown);
-  const dismissHint = useHintsStore((state) => state.dismissHint);
+export function HintTooltip({ hint, onDismiss }: HintTooltipProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (shouldShow) {
-      // Show with a slight delay for better UX
-      const showTimer = setTimeout(() => {
-        setVisible(true);
-        markShown(type);
-      }, 300);
-
-      // Auto-hide after delay
-      const hideTimer = setTimeout(() => {
-        handleDismiss();
-      }, autoHideDelay + 300);
-
-      return () => {
-        clearTimeout(showTimer);
-        clearTimeout(hideTimer);
-      };
-    }
-  }, [shouldShow, type, markShown, autoHideDelay]);
+    // Fade in after mount
+    setTimeout(() => setVisible(true), 100);
+  }, []);
 
   const handleDismiss = () => {
     setVisible(false);
-    setTimeout(() => {
-      dismissHint(type);
-    }, 300); // Wait for fade-out animation
+    setTimeout(() => onDismiss(), 300); // Wait for fade out
   };
 
-  if (!shouldShow || !visible) return null;
+  // Auto-dismiss after 8 seconds
+  useEffect(() => {
+    const timer = setTimeout(handleDismiss, 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Position classes
+  const positionClasses = {
+    'top-left': 'top-24 left-4',
+    'top-right': 'top-24 right-4',
+    'top-center': 'top-24 left-1/2 transform -translate-x-1/2',
+    'bottom-left': 'bottom-24 left-4',
+    'bottom-right': 'bottom-24 right-4',
+    'bottom-center': 'bottom-24 left-1/2 transform -translate-x-1/2',
+  };
 
   return (
     <div
-      className={`fixed ${POSITION_CLASSES[position]} z-50 max-w-sm animate-fade-in`}
-      role="alert"
+      className={`
+        fixed z-50 max-w-sm
+        ${positionClasses[hint.position]}
+        transition-all duration-300
+        ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
+      `}
     >
-      <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg shadow-2xl border-2 border-blue-400 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-blue-800/50">
-          <div className="flex items-center gap-2">
-            <svg
-              className="w-5 h-5 text-blue-200"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <h4 className="font-semibold text-sm">{title}</h4>
+      <div className="bg-blue-900/95 border-2 border-blue-500/50 rounded-lg p-4 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-start gap-3">
+          {/* Icon */}
+          {hint.icon && (
+            <div className="text-3xl flex-shrink-0">
+              {hint.icon}
+            </div>
+          )}
+          
+          {/* Message */}
+          <div className="flex-1">
+            <p className="text-blue-100 text-sm leading-relaxed">
+              {hint.message}
+            </p>
           </div>
-          <button
-            onClick={handleDismiss}
-            className="text-blue-200 hover:text-white transition-colors"
-            aria-label="Dismiss hint"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="px-4 py-3">
-          <p className="text-sm text-blue-50">{message}</p>
-        </div>
-
-        {/* Progress bar for auto-hide */}
-        <div className="h-1 bg-blue-900/30 overflow-hidden">
-          <div
-            className="h-full bg-blue-300 animate-shrink-width"
-            style={{ animationDuration: `${autoHideDelay}ms` }}
-          />
+          
+          {/* Dismiss button */}
+          {hint.dismissible && (
+            <button
+              onClick={handleDismiss}
+              className="text-blue-300 hover:text-blue-100 transition-colors text-lg flex-shrink-0"
+              title="Dismiss"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
     </div>
