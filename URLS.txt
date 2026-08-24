@@ -1,0 +1,11 @@
+# HandTrack3D Beta Testing URLs
+# Fill in as you complete Day 1 tasks
+
+STAGING_URL=
+SURVEY_URL=
+DEMO_VIDEO=
+
+# After filling in all 3 URLs, run:
+#   ./update-beta-urls.sh
+# Or manually:
+#   source URLS.txt && sed -i '' "s|\[STAGING_URL\]|$STAGING_URL|g" beta-materials/*.md
