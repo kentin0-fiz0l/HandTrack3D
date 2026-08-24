@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist",
+  "devCommand": "npx vite dev --port $PORT",
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
