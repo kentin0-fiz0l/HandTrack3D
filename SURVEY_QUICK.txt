@@ -1,0 +1,260 @@
+GOOGLE FORMS SURVEY - QUICK COPY/PASTE
+========================================
+
+FORM TITLE: HandTrack3D Beta Testing Feedback
+
+FORM DESCRIPTION:
+Thank you for testing HandTrack3D v0.3.0-alpha.0! Your feedback will directly shape the beta release. This survey takes ~5 minutes.
+
+========================================
+QUESTIONS (Copy each section below)
+========================================
+
+Q1: What's your name? (optional - for beta tester credits)
+Type: Short answer
+Required: No
+
+---
+
+Q2: What's your background?
+Type: Multiple choice
+Required: Yes
+Options:
+• Web developer
+• Designer/UX professional
+• Student/learning to code
+• Hobbyist/tinkerer
+• Other
+
+---
+
+Q3: How familiar are you with 3D web technologies (Three.js, WebGL, etc.)?
+Type: Multiple choice
+Required: Yes
+Options:
+• Very familiar (use regularly)
+• Somewhat familiar (have used before)
+• Not familiar (this is new to me)
+
+---
+
+Q4: How easy was it to get started with HandTrack3D?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Very difficult
+Label 5: Very easy
+
+---
+
+Q5: Did you complete the interactive tutorial?
+Type: Multiple choice
+Required: Yes
+Options:
+• Yes, completed all 6 steps
+• Partially (skipped some steps)
+• No, I skipped it entirely
+
+---
+
+Q6: How helpful was the tutorial in learning the basics?
+Type: Linear scale
+Required: Yes (show only if Q5 = "Yes, completed all 6 steps")
+Scale: 1 to 5
+Label 1: Not helpful
+Label 5: Very helpful
+
+---
+
+Q7: What was your first reaction when you started using HandTrack3D? (be honest!)
+Type: Paragraph
+Required: No
+
+---
+
+Q8: How well did hand tracking work for you?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Very poorly
+Label 5: Very well
+
+---
+
+Q9: Which gestures worked well for you? (Select all that apply)
+Type: Checkboxes
+Required: Yes
+Options:
+• Pinch (grab objects)
+• Open hand (release)
+• Point gesture
+• Fist gesture
+• Swipe gestures
+• None worked consistently
+
+---
+
+Q10: Did you try Build Mode (drag-to-place objects)?
+Type: Multiple choice
+Required: Yes
+Options:
+• Yes, and it worked great
+• Yes, but had issues
+• No, didn't discover it
+• No, wasn't interested
+
+---
+
+Q11: Did you try the Settings Presets (Responsive/Balanced/Precise)?
+Type: Multiple choice
+Required: Yes
+Options:
+• Yes, and they were helpful
+• Yes, but didn't notice a difference
+• No, didn't discover them
+• No, wasn't interested
+
+---
+
+Q12: How responsive did the hand tracking feel?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Very laggy
+Label 5: Very responsive
+
+---
+
+Q13: How intuitive were the interactions (grabbing, throwing, building)?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Very confusing
+Label 5: Very intuitive
+
+---
+
+Q14: Did you notice the smart hints (tutorial tips that appear as you use the app)?
+Type: Multiple choice
+Required: Yes
+Options:
+• Yes, and they were helpful
+• Yes, but they were annoying
+• No, I didn't see any hints
+• Not sure
+
+---
+
+Q15: Which features did you discover and try? (Select all that apply)
+Type: Checkboxes
+Required: Yes
+Options:
+• Settings panel (Press S)
+• Build mode (Press B)
+• Property editor (right-click objects)
+• Gesture widget (top-left)
+• Control panel (Press H)
+• Camera controls (right-click drag)
+• None of these
+
+---
+
+Q16: Was there anything you wanted to do but couldn't figure out how?
+Type: Paragraph
+Required: No
+
+---
+
+Q17: What device did you use for testing?
+Type: Multiple choice
+Required: Yes
+Options:
+• Desktop/Laptop with built-in webcam
+• Desktop/Laptop with external webcam
+• MacBook (built-in camera)
+• Other
+
+---
+
+Q18: What browser did you use?
+Type: Multiple choice
+Required: Yes
+Options:
+• Chrome
+• Edge
+• Safari
+• Firefox
+• Other
+
+---
+
+Q19: How was the overall performance (frame rate, lag, smoothness)?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Very laggy
+Label 5: Very smooth
+
+---
+
+Q20: Did you encounter any bugs or errors? If yes, please describe what happened.
+Type: Paragraph
+Required: No
+Helper text: Include what you were doing when it happened, any error messages, etc.
+
+---
+
+Q21: What improvements or new features would you most like to see?
+Type: Paragraph
+Required: No
+
+---
+
+Q22: Overall, how would you rate your experience with HandTrack3D?
+Type: Linear scale
+Required: Yes
+Scale: 1 to 5
+Label 1: Poor
+Label 5: Excellent
+
+========================================
+SETTINGS (After adding questions)
+========================================
+
+Click Settings (gear icon) → Responses tab:
+✓ Limit to 1 response
+✓ Collect email addresses
+✓ Response receipts: "Respondents can request"
+
+Presentation tab:
+✓ Show progress bar
+Confirmation message: "Thank you! Your feedback is incredibly valuable. 🙏"
+
+Click SAVE
+
+========================================
+CREATE SPREADSHEET
+========================================
+
+1. Click "Responses" tab
+2. Click green spreadsheet icon
+3. Select "Create a new spreadsheet"
+4. Name: "HandTrack3D Beta Responses"
+5. Click CREATE
+
+========================================
+GET LINK
+========================================
+
+1. Click SEND button (top-right)
+2. Click link icon (chain)
+3. Click "Shorten URL"
+4. Click COPY
+5. Paste here: _______________________
+
+Save to file:
+echo "SURVEY_URL=https://forms.gle/xxxxx" >> ~/Projects/Active/HandTrack3D/URLS.txt
+
+========================================
+DONE!
+========================================
