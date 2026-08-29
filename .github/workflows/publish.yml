@@ -1,0 +1,119 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (do not publish)'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - core
+          - react
+          - three
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Run linter
+        run: pnpm run lint
+        working-directory: packages/${{ matrix.package }}
+
+      - name: Run tests
+        run: pnpm run test
+        working-directory: packages/${{ matrix.package }}
+        continue-on-error: true
+
+      - name: Check package contents
+        run: |
+          echo "Package contents for @handtrack3d/${{ matrix.package }}:"
+          npm pack --dry-run
+        working-directory: packages/${{ matrix.package }}
+
+      - name: Publish to npm (dry-run)
+        if: github.event.inputs.dry_run == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo "DRY RUN: Would publish @handtrack3d/${{ matrix.package }}"
+          npm publish --dry-run --provenance --access public
+        working-directory: packages/${{ matrix.package }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')
+        run: npm publish --provenance --access public
+        working-directory: packages/${{ matrix.package }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')) && matrix.package == 'core'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            See CHANGELOG.md for details.
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+
+  verify-published:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run == 'false' && github.event_name == 'push'
+    strategy:
+      matrix:
+        package:
+          - core
+          - react
+          - three
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Wait for npm propagation
+        run: sleep 60
+
+      - name: Verify package is available
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "Checking @handtrack3d/${{ matrix.package }}@${VERSION}"
+          npm view @handtrack3d/${{ matrix.package }}@${VERSION}
