@@ -3,7 +3,7 @@
 **Ready to Copy/Paste**
 
 Replace placeholders:
-- `[STAGING_URL]` → Your Vercel URL
+- `https://kentin0-fiz0l.github.io/HandTrack3D/` → Your Vercel URL
 - `[SURVEY_URL]` → Your Google Forms link
 - `[DEMO_VIDEO]` → Your demo video/GIF link
 
@@ -39,7 +39,7 @@ New v0.3.0-alpha.0:
 ✅ One-click presets
 
 Demo: [DEMO_VIDEO]
-Test it: [STAGING_URL]
+Test it: https://kentin0-fiz0l.github.io/HandTrack3D/
 Feedback: [SURVEY_URL]
 
 Tech: React, Three.js, TypeScript
@@ -57,7 +57,7 @@ WebGL hand tracking app with major UX improvements:
 
 Need 5-10 devs to test for 15-20 min
 
-Try: [STAGING_URL]
+Try: https://kentin0-fiz0l.github.io/HandTrack3D/
 Survey: [SURVEY_URL]
 
 #WebDev #ThreeJS #ReactJS
@@ -103,7 +103,7 @@ Just finished a major UX overhaul (v0.3.0-alpha.0) and looking for **5-10 beta t
 
 ## Try It
 
-**Live Demo**: [STAGING_URL]
+**Live Demo**: https://kentin0-fiz0l.github.io/HandTrack3D/
 **Demo Video**: [DEMO_VIDEO]
 **Feedback Survey**: [SURVEY_URL]
 **Repository**: https://github.com/kentin0-fiz0l/HandTrack3D
@@ -162,7 +162,7 @@ React 19 + Three.js + MediaPipe + Rapier physics
 
 **Need 5-10 testers** to try it for 15-20 minutes and provide feedback.
 
-**Try it:** [STAGING_URL]
+**Try it:** https://kentin0-fiz0l.github.io/HandTrack3D/
 **Survey:** [SURVEY_URL]
 **Demo:** [DEMO_VIDEO]
 
@@ -177,7 +177,7 @@ Thanks! 🙏
 
 **Title**: Show HN: HandTrack3D – Control 3D objects with hand gestures in your browser
 
-**URL**: [STAGING_URL]
+**URL**: https://kentin0-fiz0l.github.io/HandTrack3D/
 
 **Text** (optional comment):
 ```
@@ -200,7 +200,7 @@ Would love feedback, especially on:
 2. Gesture detection responsiveness
 3. Performance on different hardware
 
-Try it: [STAGING_URL]
+Try it: https://kentin0-fiz0l.github.io/HandTrack3D/
 Feedback: [SURVEY_URL]
 GitHub: https://github.com/kentin0-fiz0l/HandTrack3D
 ```
@@ -302,7 +302,7 @@ This release focuses on **onboarding and discoverability**:
 
 ## How to Test
 
-1. **Visit**: [STAGING_URL]
+1. **Visit**: https://kentin0-fiz0l.github.io/HandTrack3D/
 2. **Allow webcam access**
 3. **Complete tutorial** (6 steps)
 4. **Explore features**
@@ -387,7 +387,7 @@ Create a spreadsheet to track testers:
 ```
 Thanks for volunteering! Here's what you need:
 
-1. Try it: [STAGING_URL]
+1. Try it: https://kentin0-fiz0l.github.io/HandTrack3D/
 2. Feedback: [SURVEY_URL]
 3. Demo: [DEMO_VIDEO]
 
@@ -427,7 +427,7 @@ Thanks for your patience!
 ## Personalization Checklist
 
 Before posting anywhere, replace:
-- [ ] `[STAGING_URL]` → Your Vercel URL
+- [ ] `https://kentin0-fiz0l.github.io/HandTrack3D/` → Your Vercel URL
 - [ ] `[SURVEY_URL]` → Your Google Forms link
 - [ ] `[DEMO_VIDEO]` → Your demo video/GIF link
 - [ ] Any personal details (your name, email, etc.)

@@ -24,7 +24,7 @@ I'm excited to invite you to beta test **HandTrack3D** - a web app that lets you
 
 ## How to Start
 
-1. **Visit**: [STAGING_URL_HERE]
+1. **Visit**: https://kentin0-fiz0l.github.io/HandTrack3D/
 2. **Allow webcam access** when prompted
 3. **Follow the tutorial** - it appears automatically
 4. **Fill out the survey**: [SURVEY_URL_HERE]
@@ -70,7 +70,7 @@ P.S. You'll be credited as a beta tester in the README (unless you prefer not to
 
 Before sending, replace:
 - [ ] [NAME] → Recipient's name
-- [ ] [STAGING_URL_HERE] → Your Vercel URL
+- [ ] https://kentin0-fiz0l.github.io/HandTrack3D/ → Your Vercel URL
 - [ ] [SURVEY_URL_HERE] → Your Google Forms link
 - [ ] [DEMO_VIDEO_URL_HERE] → Your demo video link
 - [ ] [YOUR_NAME] → Your name

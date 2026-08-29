@@ -146,7 +146,7 @@ vercel  # Deploy
 Once you have these, update all templates:
 
 ```
-Staging URL:  https://_____________________.vercel.app
+Staging URL:  https://kentin0-fiz0l.github.io/HandTrack3D/
 Survey URL:   https://forms.gle/_____________________
 Demo Video:   https://_____________________ or GitHub
 GitHub Repo:  https://github.com/kentin0-fiz0l/HandTrack3D
