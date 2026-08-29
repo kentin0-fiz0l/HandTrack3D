@@ -1,0 +1,23 @@
+Question,Type,Required,Options
+What's your name? (optional - for beta tester credits),Short answer,No,
+What's your background?,Multiple choice,Yes,"Web developer,Designer/UX professional,Student/learning to code,Hobbyist/tinkerer,Other"
+How familiar are you with 3D web technologies (Three.js WebGL etc.)?,Multiple choice,Yes,"Very familiar (use regularly),Somewhat familiar (have used before),Not familiar (this is new to me)"
+How easy was it to get started with HandTrack3D?,Linear scale 1-5,Yes,1=Very difficult 5=Very easy
+Did you complete the interactive tutorial?,Multiple choice,Yes,"Yes completed all 6 steps,Partially (skipped some steps),No I skipped it entirely"
+How helpful was the tutorial in learning the basics?,Linear scale 1-5,Yes,1=Not helpful 5=Very helpful
+What was your first reaction when you started using HandTrack3D? (be honest!),Paragraph,No,
+How well did hand tracking work for you?,Linear scale 1-5,Yes,1=Very poorly 5=Very well
+Which gestures worked well for you? (Select all that apply),Checkboxes,Yes,"Pinch (grab objects),Open hand (release),Point gesture,Fist gesture,Swipe gestures,None worked consistently"
+Did you try Build Mode (drag-to-place objects)?,Multiple choice,Yes,"Yes and it worked great,Yes but had issues,No didn't discover it,No wasn't interested"
+Did you try the Settings Presets (Responsive/Balanced/Precise)?,Multiple choice,Yes,"Yes and they were helpful,Yes but didn't notice a difference,No didn't discover them,No wasn't interested"
+How responsive did the hand tracking feel?,Linear scale 1-5,Yes,1=Very laggy 5=Very responsive
+How intuitive were the interactions (grabbing throwing building)?,Linear scale 1-5,Yes,1=Very confusing 5=Very intuitive
+Did you notice the smart hints (tutorial tips that appear as you use the app)?,Multiple choice,Yes,"Yes and they were helpful,Yes but they were annoying,No I didn't see any hints,Not sure"
+Which features did you discover and try? (Select all that apply),Checkboxes,Yes,"Settings panel (Press S),Build mode (Press B),Property editor (right-click objects),Gesture widget (top-left),Control panel (Press H),Camera controls (right-click drag),None of these"
+Was there anything you wanted to do but couldn't figure out how?,Paragraph,No,
+What device did you use for testing?,Multiple choice,Yes,"Desktop/Laptop with built-in webcam,Desktop/Laptop with external webcam,MacBook (built-in camera),Other"
+What browser did you use?,Multiple choice,Yes,"Chrome,Edge,Safari,Firefox,Other"
+How was the overall performance (frame rate lag smoothness)?,Linear scale 1-5,Yes,1=Very laggy 5=Very smooth
+Did you encounter any bugs or errors? If yes please describe what happened.,Paragraph,No,
+What improvements or new features would you most like to see?,Paragraph,No,
+Overall how would you rate your experience with HandTrack3D?,Linear scale 1-5,Yes,1=Poor 5=Excellent
