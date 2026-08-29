@@ -9,3 +9,4 @@ DEMO_VIDEO=
 #   ./update-beta-urls.sh
 # Or manually:
 #   source URLS.txt && sed -i '' "s|\[STAGING_URL\]|$STAGING_URL|g" beta-materials/*.md
+STAGING_URL=https://kentin0-fiz0l.github.io/HandTrack3D/
