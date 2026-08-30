@@ -9,11 +9,17 @@
     "dev": "node --watch index.js",
     "test-scan": "node test-scan.js"
   },
-  "keywords": ["wifi", "positioning", "rssi", "handtrack3d"],
+  "keywords": [
+    "wifi",
+    "positioning",
+    "rssi",
+    "handtrack3d"
+  ],
   "author": "HandTrack3D Phase 4A Team",
   "license": "MIT",
   "dependencies": {
     "node-wifi": "^2.0.16",
+    "three": "^0.185.1",
     "ws": "^8.18.0"
   },
   "engines": {

@@ -1,0 +1,12 @@
+name: handtrack3d-beta
+region: sfo
+static_sites:
+- name: handtrack3d
+  github:
+    repo: kentin0-fiz0l/HandTrack3D
+    branch: master
+    deploy_on_push: true
+  build_command: pnpm install --frozen-lockfile && npx vite build
+  output_dir: dist
+  routes:
+  - path: /
