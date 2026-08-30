@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useHintsStore } from '@/stores/hintsStore';
+import { usePositioningStore } from '@/stores/positioningStore';
 import { SettingSlider } from '@/components/ui/SettingSlider';
 import { SettingToggle } from '@/components/ui/SettingToggle';
 import { SceneTemplates } from '@/components/SceneTemplates/SceneTemplates';
@@ -13,13 +14,14 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
-type TabType = 'scene' | 'gestures' | 'physics' | 'tracking' | 'visual';
+type TabType = 'scene' | 'gestures' | 'physics' | 'tracking' | 'visual' | 'positioning';
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('scene');
   const settings = useSettingsStore();
   const { resetTutorial } = useTutorialStore();
   const { resetHints } = useHintsStore();
+  const positioning = usePositioningStore();
 
   // Handle ESC key to close
   useEffect(() => {
@@ -56,6 +58,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     { id: 'physics', label: 'Physics' },
     { id: 'tracking', label: 'Tracking' },
     { id: 'visual', label: 'Visual' },
+    { id: 'positioning', label: 'Positioning' },
   ];
 
   return (
@@ -366,6 +369,131 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 Clear all shown hints to see them again
               </p>
             </div>
+              </div>
+            )}
+
+            {/* Positioning Tab */}
+            {activeTab === 'positioning' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded">
+                  <h4 className="font-semibold text-blue-400 mb-2">WiFi Room-Scale Positioning</h4>
+                  <p className="text-sm text-gray-300 mb-2">
+                    Combine WiFi positioning with hand tracking for room-scale spatial awareness.
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Requires WiFi companion app running on this device.
+                  </p>
+                </div>
+
+                <SettingToggle
+                  label="Enable Positioning"
+                  checked={positioning.enablePositioning}
+                  onChange={(checked) => positioning.updateSetting('enablePositioning', checked)}
+                  description="Enable WiFi positioning system"
+                />
+
+                {positioning.enablePositioning && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Positioning Mode
+                      </label>
+                      <select
+                        value={positioning.positioningMode}
+                        onChange={(e) => positioning.setPositioningMode(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="disabled">Disabled</option>
+                        <option value="wifi-only">WiFi Only</option>
+                        <option value="fusion">Sensor Fusion (WiFi + Camera)</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {positioning.positioningMode === 'wifi-only' &&
+                          'Use only WiFi RSSI for positioning (±2-5m accuracy)'}
+                        {positioning.positioningMode === 'fusion' &&
+                          'Combine WiFi and camera tracking for best accuracy'}
+                        {positioning.positioningMode === 'disabled' && 'Positioning disabled'}
+                      </p>
+                    </div>
+
+                    <SettingSlider
+                      label="Update Interval"
+                      value={positioning.updateInterval}
+                      min={100}
+                      max={2000}
+                      step={100}
+                      unit="ms"
+                      onChange={(value) => positioning.updateSetting('updateInterval', value)}
+                      description="How often to update position (lower = more responsive)"
+                    />
+
+                    <div className="pt-4 border-t border-white/20 space-y-3">
+                      <button
+                        onClick={() => {
+                          positioning.startCalibration();
+                          onClose();
+                        }}
+                        disabled={!positioning.isConnected}
+                        className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition font-medium"
+                      >
+                        📍 Calibrate Routers ({positioning.routers.length}/4)
+                      </button>
+                      <p className="text-xs text-gray-500">
+                        {positioning.isConnected
+                          ? 'Configure router positions for room-scale tracking'
+                          : '⚠️ Connect to companion app first'}
+                      </p>
+
+                      {positioning.routers.length > 0 && (
+                        <>
+                          <button
+                            onClick={() => {
+                              if (
+                                confirm('This will delete all configured routers. Continue?')
+                              ) {
+                                positioning.setRouters([]);
+                              }
+                            }}
+                            className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-medium"
+                          >
+                            🗑️ Clear All Routers
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Router List */}
+                    {positioning.routers.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-300">
+                          Configured Routers:
+                        </h4>
+                        {positioning.routers.map((router) => (
+                          <div
+                            key={router.id}
+                            className="p-3 bg-gray-800 border border-gray-700 rounded"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="text-white font-medium">{router.name}</div>
+                                <div className="text-xs text-gray-400">
+                                  Position: ({router.position[0].toFixed(1)},{' '}
+                                  {router.position[1].toFixed(1)}, {router.position[2].toFixed(1)})m
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => positioning.removeRouter(router.id)}
+                                className="text-red-400 hover:text-red-300 text-xs"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>

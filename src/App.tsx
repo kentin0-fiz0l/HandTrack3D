@@ -14,7 +14,9 @@ import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDis
 import { LoadingOverlay } from './components/Loading/LoadingOverlay';
 import { PerformanceWarning } from './components/Performance/PerformanceWarning';
 import { BuildMode } from './components/BuildMode/BuildMode';
+import { PositioningStatus, CalibrationWizard } from './components/Positioning';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useWiFiPositioning } from './hooks/useWiFiPositioning';
 import { useBuildModeStore } from './stores/buildModeStore';
 import { useSettingsStore } from './stores/settingsStore';
 import { usePoseTrackingStore } from './stores/poseTrackingStore';
@@ -27,6 +29,9 @@ function App() {
   const [selectedColor, setSelectedColor] = useState('#3b82f6');
   const [selectedSize, setSelectedSize] = useState(1.0);
   const toggleBuildMode = useBuildModeStore((state) => state.toggleBuildMode);
+
+  // Initialize WiFi positioning
+  useWiFiPositioning();
 
   // Debug toggles
   const showDepthBreakdown = useSettingsStore((state) => state.showDepthBreakdown);
@@ -115,6 +120,12 @@ function App() {
 
       {/* Gesture Status Widget */}
       {showGestureWidget && <GestureStatusWidget compact={compactGestureWidget} />}
+
+      {/* WiFi Positioning Status */}
+      <PositioningStatus />
+
+      {/* Calibration Wizard */}
+      <CalibrationWizard />
 
       {/* Depth Breakdown Debug Panel */}
       <DepthBreakdownPanel show={showDepthBreakdown} />
