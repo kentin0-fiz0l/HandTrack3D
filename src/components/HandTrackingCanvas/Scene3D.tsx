@@ -16,6 +16,7 @@ import { PerformanceTracker } from '@/components/PerformanceMonitor/PerformanceT
 import { BuildModeController } from '@/components/BuildMode/BuildModeController';
 import { GhostObject } from '@/components/BuildMode/GhostObject';
 import { SpotlightTracker } from '@/components/Tutorial/SpotlightTracker';
+import { RoomOriginMarker } from '@/components/Positioning/RoomOriginMarker';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
 import { useMemo, useEffect, useRef, useCallback, Profiler } from 'react';
@@ -237,6 +238,9 @@ export function Scene3D({
           <GhostObject />
         </>
       )}
+
+      {/* Room origin marker (sensor fusion) */}
+      <RoomOriginMarker />
     </Profiler>
   );
 }
