@@ -1,0 +1,22 @@
+{
+  "name": "handtrack3d-wifi-companion",
+  "version": "0.1.0",
+  "description": "WiFi RSSI companion app for HandTrack3D positioning",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test-scan": "node test-scan.js"
+  },
+  "keywords": ["wifi", "positioning", "rssi", "handtrack3d"],
+  "author": "HandTrack3D Phase 4A Team",
+  "license": "MIT",
+  "dependencies": {
+    "node-wifi": "^2.0.16",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

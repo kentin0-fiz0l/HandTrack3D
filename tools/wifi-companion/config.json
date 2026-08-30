@@ -1,0 +1,55 @@
+{
+  "websocket": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "wifi": {
+    "scanInterval": 500,
+    "iface": null
+  },
+  "routers": [
+    {
+      "name": "Router 1",
+      "bssid": "00:00:00:00:00:00",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "referenceRssi": -40,
+      "pathLossExponent": 2.5
+    },
+    {
+      "name": "Router 2",
+      "bssid": "00:00:00:00:00:00",
+      "position": {
+        "x": 5,
+        "y": 0,
+        "z": 0
+      },
+      "referenceRssi": -40,
+      "pathLossExponent": 2.5
+    },
+    {
+      "name": "Router 3",
+      "bssid": "00:00:00:00:00:00",
+      "position": {
+        "x": 0,
+        "y": 5,
+        "z": 0
+      },
+      "referenceRssi": -40,
+      "pathLossExponent": 2.5
+    }
+  ],
+  "calibration": {
+    "note": "Measure router positions and update BSSIDs above",
+    "instructions": [
+      "1. Find each router's MAC address (BSSID) using your OS WiFi settings",
+      "2. Measure physical position of each router in meters (use corner of room as origin)",
+      "3. Stand 1 meter from each router and measure RSSI to get referenceRssi",
+      "4. Update config.json with actual values",
+      "5. Restart companion app"
+    ]
+  }
+}
