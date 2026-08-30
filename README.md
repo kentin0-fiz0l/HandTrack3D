@@ -54,6 +54,14 @@ HandTrack3D is both a **modular SDK** and **showcase application** for building 
 - 🏗️ **Build Mode** - Drag-to-place objects with grid snapping (Press **B**)
 - 🎨 **Property Editor** - Right-click objects to customize physics and visuals
 
+**Room-Scale Positioning** *(New in v0.4.0-alpha.0)*:
+- 📡 **WiFi Positioning** - Room-scale spatial awareness using WiFi trilateration (±2-5m accuracy)
+- 🧭 **Sensor Fusion** - Kalman filter combines WiFi + camera for ±1-2cm accuracy in room coordinates
+- 🎯 **Room Origin Marker** - 3D coordinate system visualization (XYZ axes at room origin)
+- 📊 **Fusion Debug Panel** - Real-time statistics (active filters, camera pose, uncertainty)
+- ⚙️ **Router Calibration** - 4-step wizard to configure WiFi router positions
+- 🔄 **Persistent Coordinates** - Hand positions in room-relative coordinates (not just camera-relative)
+
 **Visual Feedback**:
 - Color-coded hand cursors (blue = right, green = left)
 - Gesture status widget with emoji icons
@@ -219,6 +227,72 @@ Right-click any object to edit:
 - **Interaction**: Lock (prevent grabbing), visibility toggle
 - **Actions**: Reset to defaults, delete object
 
+### WiFi Positioning & Sensor Fusion *(New in v0.4.0-alpha.0)*
+
+#### Setup WiFi Positioning
+
+1. **Start WiFi companion app** (required for WiFi positioning):
+   ```bash
+   cd tools/wifi-companion
+   npm install
+   npm start
+   ```
+   This starts a WebSocket server on `localhost:8080` that provides WiFi RSSI data.
+
+2. **Enable positioning** in HandTrack3D:
+   - Open Settings (press **S**)
+   - Go to **Positioning** tab
+   - Toggle **Enable Positioning** ON
+   - Set **Mode** to **WiFi Only** or **Sensor Fusion** (recommended)
+
+3. **Calibrate routers**:
+   - Click **Calibrate Routers** button
+   - Follow 4-step wizard:
+     1. Select WiFi network from scan
+     2. Add router name and room position (X, Y, Z in meters)
+     3. Add 2+ more routers (minimum 3 required)
+     4. Finish calibration
+   - Router positions are saved and persist across sessions
+
+#### Using Sensor Fusion
+
+**WiFi Only Mode** (±2-5m accuracy):
+- Uses trilateration from 3+ WiFi routers
+- Good for room-scale awareness (which room, approximate position)
+- Updates every ~500ms (2Hz)
+
+**Sensor Fusion Mode** (±1-2cm accuracy):
+- Combines WiFi positioning with MediaPipe camera tracking
+- Uses Kalman filter to fuse low-frequency WiFi with high-frequency camera
+- Hand positions in **room-relative coordinates** (persistent across camera movement)
+- Benefits:
+  - ✅ Smooth motion (velocity estimation filters jitter)
+  - ✅ Outlier rejection (WiFi signal spikes filtered out)
+  - ✅ Sub-centimeter accuracy in room coordinates
+  - ✅ Persistent positioning (not just camera-relative)
+
+#### Visual Indicators
+
+- **Positioning Status Widget** (top-right):
+  - Connection status (Connected / Disconnected)
+  - Current mode (WiFi Only / Sensor Fusion / Disabled)
+  - Router count (e.g., "3 routers")
+  - Current room position (X, Y, Z in meters)
+  - Press **W** to toggle visibility
+
+- **Room Origin Marker** (3D scene):
+  - Red arrow: +X axis (right, 50cm)
+  - Green arrow: +Y axis (up, 50cm)
+  - Blue arrow: +Z axis (forward, 50cm)
+  - White sphere: Origin point (0, 0, 0)
+  - XZ grid: Ground plane (5m × 5m)
+
+- **Fusion Debug Panel** (bottom-left):
+  - Active Kalman filters (1-2, one per hand)
+  - Camera pose status (Available / Unavailable)
+  - Average position uncertainty (±meters)
+  - Per-hand room positions and uncertainty
+
 ### Physics Features
 
 - **Gravity** (9.81 m/s²) - Objects fall naturally when released
@@ -237,6 +311,8 @@ Right-click any object to edit:
 | `B` | Toggle build mode (drag-to-place objects) |
 | `P` | Toggle pose skeleton visualization (debug) |
 | `D` | Toggle depth breakdown panel (debug) |
+| `W` | Toggle WiFi positioning status widget *(v0.4.0)* |
+| `C` | Open router calibration wizard *(v0.4.0)* |
 
 ### Camera Controls
 
@@ -275,13 +351,21 @@ Right-click any object to edit:
 - **@mediapipe/camera_utils** - Webcam integration
 - Loaded via CDN for compatibility
 
+### Positioning & Sensor Fusion *(v0.4.0+)*
+
+- **WiFi Companion App** - WebSocket server for WiFi RSSI data collection
+- **Kalman Filter** - 6DOF state estimation [x, y, z, vx, vy, vz]
+- **Trilateration** - 3D position from WiFi signal strength (3+ routers)
+- **Sensor Fusion Service** - Combines WiFi (±2-5m) + camera (±1cm) for ±1-2cm accuracy
+
 ### State Management
 
-- **Zustand** - Lightweight state management
+- **Zustand** - Lightweight state management with persistence middleware
   - `handTrackingStore` - Hand positions and tracking data
   - `sceneStore` - 3D objects and grab state
   - `useGestureStore` - Gesture detection state
   - `useHandCursorStore` - 3D cursor positions
+  - `positioningStore` - WiFi routers, room position, calibration *(v0.4.0)*
 
 ### Styling
 
@@ -295,19 +379,20 @@ Right-click any object to edit:
 ### Data Flow
 
 ```
-Webcam (30fps)
-    ↓
-MediaPipe Hands (CDN)
-    ↓
-handTrackingStore (21 landmarks × 2 hands)
-    ↓
-┌─────────────────┬──────────────────┐
-↓                 ↓                  ↓
-Gesture Detection  Hand-to-3D Mapping  HandOverlay (2D)
-(pinch/open/fist)  (screen→world)      (skeleton viz)
-    ↓                 ↓
-useGestureStore    useHandCursorStore
-    ↓                 ↓
+Webcam (30fps)                     WiFi Companion (WebSocket, 2Hz)
+    ↓                                      ↓
+MediaPipe Hands (CDN)              WiFi RSSI Scan (3+ routers)
+    ↓                                      ↓
+handTrackingStore                  positioningStore
+(21 landmarks × 2 hands)           (routers, trilateration)
+    ↓                                      ↓
+┌───────────┬──────────┬──────────────────┴──────────────────┐
+↓           ↓          ↓                                      ↓
+Gesture     Hand-to-3D HandOverlay                    Sensor Fusion
+Detection   Mapping    (2D skeleton)                  (Kalman filter)
+            ↓                                                 ↓
+useGestureStore    useHandCursorStore ←─────── WiFi + Camera fusion
+    ↓                 ↓                       (room coordinates)
     └────────┬────────┘
              ↓
     InteractiveObject
@@ -316,6 +401,8 @@ useGestureStore    useHandCursorStore
     sceneStore (object positions)
              ↓
     Scene3D (R3F Canvas, 60fps)
+        ↓
+    RoomOriginMarker (XYZ axes at origin)
 ```
 
 ### Project Structure
@@ -362,22 +449,51 @@ HandTrack3D/
 │   │   ├── WebcamFeed/            # Webcam and overlay
 │   │   │   ├── WebcamFeed.tsx
 │   │   │   └── HandOverlay.tsx    # 2D skeleton visualization
-│   │   └── ControlPanel/          # Status UI
+│   │   ├── ControlPanel/          # Status UI
+│   │   ├── Positioning/           # WiFi positioning & fusion (v0.4.0)
+│   │   │   ├── PositioningStatus.tsx    # Connection status widget
+│   │   │   ├── CalibrationWizard.tsx    # Router calibration
+│   │   │   ├── RoomOriginMarker.tsx     # 3D coordinate axes
+│   │   │   └── SensorFusionDebug.tsx    # Fusion statistics panel
+│   │   ├── Tutorial/              # Interactive tutorial (v0.3.0)
+│   │   ├── GestureStatusWidget/   # Real-time gesture display (v0.3.0)
+│   │   └── BuildMode/             # Drag-to-place objects (v0.3.0)
 │   ├── hooks/
 │   │   ├── useWebcam.ts           # Camera access
 │   │   ├── useHandTracking.ts     # MediaPipe integration
 │   │   ├── useHandTo3DMapping.ts  # 2D→3D coordinate mapping
 │   │   ├── useGestureRecognition.ts
-│   │   └── useKeyboardShortcuts.ts
+│   │   ├── useKeyboardShortcuts.ts
+│   │   ├── useWiFiPositioning.ts  # WiFi companion connection (v0.4.0)
+│   │   └── useSensorFusion.ts     # Kalman filter integration (v0.4.0)
 │   ├── stores/
 │   │   ├── handTrackingStore.ts
-│   │   └── sceneStore.ts
+│   │   ├── sceneStore.ts
+│   │   ├── positioningStore.ts    # WiFi routers & position (v0.4.0)
+│   │   ├── tutorialStore.ts       # Tutorial state (v0.3.0)
+│   │   └── buildModeStore.ts      # Build mode state (v0.3.0)
+│   ├── services/
+│   │   └── sensorFusion/          # Sensor fusion service (v0.4.0)
+│   │       └── SensorFusionService.ts
 │   └── utils/
-│       └── collisionDetection.ts  # Proximity detection
+│       ├── collisionDetection.ts  # Proximity detection
+│       └── kalman/                # Kalman filter (v0.4.0)
+│           └── KalmanFilter.ts    # 6DOF state estimation
 ├── examples/                      # Plugin tutorials
 │   ├── custom-gesture-plugin.md
 │   ├── custom-interaction-plugin.md
 │   └── custom-physics-adapter.md
+├── tools/                         # Development tools
+│   └── wifi-companion/            # WiFi positioning server (v0.4.0)
+│       ├── server.js              # WebSocket server (port 8080)
+│       ├── wifiScanner.js         # WiFi RSSI scanner
+│       └── package.json
+├── docs/phase4/                   # Phase 4 documentation (v0.4.0)
+│   ├── PHASE_4B_SUMMARY.md        # Sensor fusion integration
+│   ├── PHASE_4C_SUMMARY.md        # Kalman filter implementation
+│   ├── POSITIONING_RESEARCH.md    # Technical background
+│   ├── QUICKSTART.md              # Setup guide
+│   └── TEST_RESULTS.md            # Accuracy benchmarks
 └── public/                        # Static assets
 ```
 
@@ -461,6 +577,20 @@ Converts MediaPipe's normalized 2D coordinates (0-1) to 3D world space:
 - **Use VPN**: Some regions may block CDN
 - **Local hosting**: Download MediaPipe files for offline use
 
+### WiFi positioning not connecting *(v0.4.0)*
+
+- **Companion app not running**: Start WiFi companion (`cd tools/wifi-companion && npm start`)
+- **Port blocked**: Check if port 8080 is available (WebSocket server)
+- **Wrong network**: Companion app must be on same network as browser
+- **Firewall**: Allow incoming WebSocket connections on port 8080
+
+### Sensor fusion not working *(v0.4.0)*
+
+- **Mode disabled**: Check Settings → Positioning → Mode = "Sensor Fusion"
+- **No routers calibrated**: Need 3+ routers for trilateration
+- **WiFi not connected**: Positioning Status should show "Connected"
+- **Camera pose unavailable**: Check if WiFi position is being received (green indicator)
+
 ---
 
 ## Performance Optimization
@@ -530,18 +660,33 @@ detector.registerGesture(new MyCustomGesture());
 - ✅ Multi-hand support (up to 2 hands)
 - ✅ npm packages published
 
-### Planned (v0.3.0+)
+### Completed (v0.3.0-alpha.0)
+- ✅ Interactive tutorial mode (6-step onboarding)
+- ✅ Smart hints system (contextual tooltips)
+- ✅ Gesture status widget (real-time confidence display)
+- ✅ Settings presets (Responsive/Balanced/Precise)
+- ✅ Build mode (drag-to-place with grid snapping)
+- ✅ Per-object property editor (right-click customization)
+
+### Completed (v0.4.0-alpha.0)
+- ✅ WiFi positioning system (±2-5m room-scale tracking)
+- ✅ Sensor fusion (Kalman filter WiFi + camera)
+- ✅ Room-relative coordinates (persistent positioning)
+- ✅ Router calibration wizard (4-step setup)
+- ✅ Fusion debug panel (real-time statistics)
+- ✅ Room origin marker (3D coordinate visualization)
+
+### Planned (v0.5.0+)
+- [ ] IMU integration (gyroscope/accelerometer for camera orientation)
+- [ ] UWB hardware support (±10-30cm accuracy)
+- [ ] Multi-user positioning (multiple devices, shared room coordinates)
 - [ ] Plugin marketplace / discovery
 - [ ] Additional physics adapters (Cannon.js, Ammo.js official support)
 - [ ] More gesture plugins (swipe, rotate, pinch-to-zoom, two-hand gestures)
 - [ ] Performance profiling tools
-- [ ] Plugin debugging utilities
-- [ ] Settings panel UI (sensitivity, detection thresholds)
-- [ ] Custom object creation UI
 - [ ] Multi-user collaboration
 - [ ] VR/AR integration
 - [ ] Gesture recording and playback
-- [ ] Example scenes (playground, tutorials)
 
 ---
 
@@ -559,6 +704,15 @@ detector.registerGesture(new MyCustomGesture());
 - [@handtrack3d/rapier](https://www.npmjs.com/package/@handtrack3d/rapier) - Rapier physics adapter
 
 ### Documentation
+
+**Phase 4 (WiFi Positioning & Sensor Fusion)**:
+- [Phase 4B: Sensor Fusion Integration](docs/phase4/PHASE_4B_SUMMARY.md) - WiFi positioning UI implementation
+- [Phase 4C: Kalman Filter Implementation](docs/phase4/PHASE_4C_SUMMARY.md) - Sensor fusion core algorithm
+- [WiFi Positioning Research](docs/phase4/POSITIONING_RESEARCH.md) - Technical background and design decisions
+- [Quick Start Guide](docs/phase4/QUICKSTART.md) - WiFi companion setup and calibration
+- [Test Results](docs/phase4/TEST_RESULTS.md) - Accuracy measurements and performance benchmarks
+
+**General**:
 - [Plugin System Guide](examples/custom-gesture-plugin.md)
 - [CHANGELOG](CHANGELOG.md)
 - [Release Notes v0.2.0-alpha.0](RELEASE_NOTES_v0.2.0-alpha.0.md)
@@ -583,6 +737,6 @@ MIT License - See LICENSE file for details.
 
 <div align="center">
 
-**v0.2.0-alpha.0** • Plugin System Complete • **Built with ❤️ using TypeScript, React, Three.js, and MediaPipe**
+**v0.4.0-alpha.0** • WiFi Positioning & Sensor Fusion Complete • **Built with ❤️ using TypeScript, React, Three.js, and MediaPipe**
 
 </div>
