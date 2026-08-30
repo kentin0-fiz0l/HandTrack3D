@@ -7,6 +7,8 @@ import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureStore } from '@/hooks/useGestureRecognition';
 import { isInGrabRange } from '@/utils/collisionDetection';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useBuildModeStore } from '@/stores/buildModeStore';
+import { useHintsStore } from '@/stores/hintsStore';
 import { GrabPlugin, RapierAdapter } from '@handtrack3d/rapier';
 import type { HandState } from '@handtrack3d/rapier';
 import * as THREE from 'three';
@@ -27,8 +29,10 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
   const getObjectProperties = useSceneStore((state) => state.getObjectProperties);
   const selectObject = useSceneStore((state) => state.selectObject);
   const selectedObjectId = useSceneStore((state) => state.selectedObjectId);
+  const incrementGestureCount = useHintsStore((state) => state.incrementGestureCount);
 
   const [isNearHand, setIsNearHand] = useState(false);
+  const [wasGrabbed, setWasGrabbed] = useState(false);
 
   // Get properties for this object
   const properties = getObjectProperties(object.id);
@@ -76,7 +80,7 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
     if (!rigidBodyRef.current) return;
 
     // Skip interaction if object is locked, static, or in build mode
-    const buildMode = useSceneStore.getState().buildMode;
+    const buildMode = useBuildModeStore.getState().enabled;
     if (properties.locked || properties.isStatic || buildMode) {
       setIsNearHand(false);
       return;
@@ -113,6 +117,17 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
     });
 
     setIsNearHand(nearHand);
+
+    // Track grab events for hints
+    const isGrabbed = grabPlugin.isGrabbed(object.id);
+    if (isGrabbed && !wasGrabbed) {
+      // Object just got grabbed
+      incrementGestureCount('grab');
+      setWasGrabbed(true);
+    } else if (!isGrabbed && wasGrabbed) {
+      // Object was released
+      setWasGrabbed(false);
+    }
   });
 
   const { type, position, rotation, scale } = object;

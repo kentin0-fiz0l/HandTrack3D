@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Raycaster, Vector3, Mesh, PlaneGeometry, MeshStandardMaterial } from 'three';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useBuildModeStore } from '@/stores/buildModeStore';
+import { useHintsStore } from '@/stores/hintsStore';
 import type { SceneObject } from '@/types/scene.types';
 
 interface BuildModeControllerProps {
@@ -16,9 +18,12 @@ export function BuildModeController({
   selectedSize,
 }: BuildModeControllerProps) {
   const { camera, gl, scene } = useThree();
-  const buildMode = useSceneStore((state) => state.buildMode);
+  const buildMode = useBuildModeStore((state) => state.enabled);
+  const gridSnapEnabled = useBuildModeStore((state) => state.gridSnapEnabled);
+  const gridSnapSize = useBuildModeStore((state) => state.gridSnapSize);
   const setGhostPreview = useSceneStore((state) => state.setGhostPreview);
   const addObject = useSceneStore((state) => state.addObject);
+  const incrementObjectsSpawned = useHintsStore((state) => state.incrementObjectsSpawned);
 
   const raycaster = useRef(new Raycaster());
   const mouse = useRef(new Vector3());
@@ -66,16 +71,22 @@ export function BuildModeController({
         if (intersects.length > 0) {
           const point = intersects[0].point;
 
-          // Snap to grid (0.5 unit intervals)
-          const snappedX = Math.round(point.x / 0.5) * 0.5;
-          const snappedZ = Math.round(point.z / 0.5) * 0.5;
-          const snappedY = 0.5 * selectedSize; // Half the object height above ground
+          // Apply grid snapping if enabled
+          let finalX = point.x;
+          let finalZ = point.z;
+
+          if (gridSnapEnabled) {
+            finalX = Math.round(point.x / gridSnapSize) * gridSnapSize;
+            finalZ = Math.round(point.z / gridSnapSize) * gridSnapSize;
+          }
+
+          const finalY = 0.5 * selectedSize; // Half the object height above ground
 
           // Update ghost preview
           const ghostObject: SceneObject = {
             id: 'ghost-preview',
             type: selectedType,
-            position: [snappedX, snappedY, snappedZ],
+            position: [finalX, finalY, finalZ],
             rotation: [0, 0, 0],
             scale: selectedSize,
             color: selectedColor,
@@ -100,6 +111,7 @@ export function BuildModeController({
         };
 
         addObject(newObject);
+        incrementObjectsSpawned();
       }
     };
 
@@ -117,8 +129,11 @@ export function BuildModeController({
     selectedType,
     selectedColor,
     selectedSize,
+    gridSnapEnabled,
+    gridSnapSize,
     setGhostPreview,
     addObject,
+    incrementObjectsSpawned,
   ]);
 
   return null; // This component doesn't render anything

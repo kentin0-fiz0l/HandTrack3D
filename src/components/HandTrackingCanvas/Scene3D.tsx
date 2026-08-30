@@ -2,6 +2,7 @@
 import { OrbitControls, Grid } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useBuildModeStore } from '@/stores/buildModeStore';
 import { useHandTo3DMapping, useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useGestureRecognition, useGestureStore } from '@/hooks/useGestureRecognition';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -13,7 +14,7 @@ import { HandSkeleton } from '@/components/HandSkeleton/HandSkeleton';
 import { InteractiveObject } from './InteractiveObject';
 import { PerformanceTracker } from '@/components/PerformanceMonitor/PerformanceTracker';
 import { BuildModeController } from '@/components/BuildMode/BuildModeController';
-import { GhostPreview } from '@/components/BuildMode/GhostPreview';
+import { GhostObject } from '@/components/BuildMode/GhostObject';
 import { SpotlightTracker } from '@/components/Tutorial/SpotlightTracker';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
@@ -48,14 +49,15 @@ export function Scene3D({
   selectedSize = 1.0,
 }: Scene3DProps) {
   // Optimized store subscriptions with selectors and shallow equality
-  const { objects, buildMode, grabbedObjects } = useSceneStore(
+  const { objects, grabbedObjects } = useSceneStore(
     (state) => ({
       objects: state.objects,
-      buildMode: state.buildMode,
       grabbedObjects: state.grabbedObjects,
     }),
     shallow
   );
+
+  const buildMode = useBuildModeStore((state) => state.enabled);
 
   const cursors = useHandCursorStore((state) => state.cursors);
   const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
@@ -232,7 +234,7 @@ export function Scene3D({
             selectedColor={selectedColor}
             selectedSize={selectedSize}
           />
-          <GhostPreview />
+          <GhostObject />
         </>
       )}
     </Profiler>

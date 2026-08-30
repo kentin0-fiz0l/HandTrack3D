@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSceneStore } from '@/stores/sceneStore';
+import { useBuildModeStore } from '@/stores/buildModeStore';
 import { useHintsStore } from '@/stores/hintsStore';
 import type { SceneObject } from '@/types/scene.types';
 
@@ -34,8 +35,10 @@ export function ObjectSpawner({ onSelectionChange }: ObjectSpawnerProps = {}) {
   const [size, setSize] = useState(1.0);
   const [color, setColor] = useState('#3b82f6');
   const addObject = useSceneStore((state) => state.addObject);
-  const buildMode = useSceneStore((state) => state.buildMode);
-  const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+  const buildMode = useBuildModeStore((state) => state.enabled);
+  const toggleBuildMode = useBuildModeStore((state) => state.toggleBuildMode);
+  const gridSnapEnabled = useBuildModeStore((state) => state.gridSnapEnabled);
+  const toggleGridSnap = useBuildModeStore((state) => state.toggleGridSnap);
   const incrementObjectsSpawned = useHintsStore((state) => state.incrementObjectsSpawned);
 
   const handleTypeChange = (type: ObjectType) => {
@@ -96,8 +99,20 @@ export function ObjectSpawner({ onSelectionChange }: ObjectSpawnerProps = {}) {
       </div>
 
       {buildMode && (
-        <div className="mb-3 p-2 bg-green-900/30 border border-green-600/50 rounded text-xs text-green-200">
-          Click anywhere to place objects. Press <strong>B</strong> to exit.
+        <div className="mb-3 space-y-2">
+          <div className="p-2 bg-green-900/30 border border-green-600/50 rounded text-xs text-green-200">
+            Click anywhere to place objects. Press <strong>ESC</strong> to exit.
+          </div>
+          <button
+            onClick={toggleGridSnap}
+            className={`w-full px-3 py-2 text-xs font-medium rounded transition-colors ${
+              gridSnapEnabled
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+            }`}
+          >
+            Grid Snap: {gridSnapEnabled ? 'ON' : 'OFF'} (Press G)
+          </button>
         </div>
       )}
 

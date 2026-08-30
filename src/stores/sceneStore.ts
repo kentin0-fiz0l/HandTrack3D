@@ -26,7 +26,6 @@ interface SceneStore {
   grabbedObjects: Map<string, GrabbedObject>; // Map handId -> GrabbedObject
   objectProperties: Map<string, ObjectProperties>; // Map objectId -> ObjectProperties
   selectedObjectId: string | null; // Currently selected object for property editing
-  buildMode: boolean;
   ghostPreview: SceneObject | null;
 
   addObject: (object: SceneObject) => void;
@@ -38,7 +37,6 @@ interface SceneStore {
   updateObjectPosition: (id: string, position: [number, number, number]) => void;
   isObjectGrabbed: (objectId: string) => boolean;
   getNearObjects: (handPosition: THREE.Vector3, grabRange: number) => SceneObject[];
-  toggleBuildMode: () => void;
   setGhostPreview: (preview: SceneObject | null) => void;
 
   // Per-object property management
@@ -88,7 +86,6 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
   grabbedObjects: new Map(),
   objectProperties: new Map(),
   selectedObjectId: null,
-  buildMode: false,
   ghostPreview: null,
 
   addObject: (object) =>
@@ -191,12 +188,6 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
       return distance <= grabRange;
     });
   },
-
-  toggleBuildMode: () =>
-    set((state) => ({
-      buildMode: !state.buildMode,
-      ghostPreview: null, // Clear ghost preview when toggling
-    })),
 
   setGhostPreview: (preview) =>
     set({

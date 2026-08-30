@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTutorialStore } from '@/stores/tutorialStore';
+import { useHintsStore } from '@/stores/hintsStore';
 import { SettingSlider } from '@/components/ui/SettingSlider';
 import { SettingToggle } from '@/components/ui/SettingToggle';
 import { SceneTemplates } from '@/components/SceneTemplates/SceneTemplates';
@@ -18,6 +19,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('scene');
   const settings = useSettingsStore();
   const { resetTutorial } = useTutorialStore();
+  const { resetHints } = useHintsStore();
 
   // Handle ESC key to close
   useEffect(() => {
@@ -337,7 +339,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             />
 
             {/* Replay Tutorial Button */}
-            <div className="pt-4 border-t border-white/20">
+            <div className="pt-4 border-t border-white/20 space-y-3">
               <button
                 onClick={() => {
                   resetTutorial();
@@ -347,8 +349,21 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               >
                 🎓 Replay Tutorial
               </button>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-500">
                 Restart the interactive tutorial from the beginning
+              </p>
+
+              <button
+                onClick={() => {
+                  resetHints();
+                  onClose();
+                }}
+                className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition font-medium"
+              >
+                💡 Reset Hints
+              </button>
+              <p className="text-xs text-gray-500">
+                Clear all shown hints to see them again
               </p>
             </div>
               </div>

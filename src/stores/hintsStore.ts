@@ -14,21 +14,25 @@ interface HintsStore {
   gestureCount: Record<string, number>; // { pinch: 5, open: 3, ... }
   objectsSpawned: number;
   sessionCount: number;
-  
+
   // Shown hints tracking
   shownHints: Set<string>; // IDs of hints already shown
   activeHints: Set<string>; // IDs of currently visible hints
-  
+
   // Actions
   incrementCameraRotations: () => void;
   incrementGestureCount: (gesture: string) => void;
   incrementObjectsSpawned: () => void;
   incrementSessionCount: () => void;
-  
+
   markHintAsShown: (hintId: string) => void;
   addActiveHint: (hintId: string) => void;
   removeActiveHint: (hintId: string) => void;
-  
+
+  // Helper methods
+  trackEvent: (eventName: string, count?: number) => void;
+  shouldShowHint: (hintId: string) => boolean;
+
   resetHints: () => void;
 }
 
@@ -135,6 +139,30 @@ export const useHintsStore = create<HintsStore>()(
         const newActiveHints = new Set(get().activeHints);
         newActiveHints.delete(hintId);
         set({ activeHints: newActiveHints });
+      },
+
+      // Helper: Track generic events
+      trackEvent: (eventName, count = 1) => {
+        switch (eventName) {
+          case 'camera-rotated':
+            set((state) => ({
+              cameraRotations: state.cameraRotations + count,
+            }));
+            break;
+          case 'object-spawned':
+            set((state) => ({
+              objectsSpawned: state.objectsSpawned + count,
+            }));
+            break;
+          default:
+            // For custom events, could extend this
+            console.warn(`Unknown event: ${eventName}`);
+        }
+      },
+
+      // Helper: Check if a hint should be shown
+      shouldShowHint: (hintId) => {
+        return !get().shownHints.has(hintId);
       },
 
         // Reset all hints (for testing)

@@ -13,8 +13,9 @@ import { DepthBreakdownPanel } from './components/Debug/DepthBreakdownPanel';
 import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDisplay';
 import { LoadingOverlay } from './components/Loading/LoadingOverlay';
 import { PerformanceWarning } from './components/Performance/PerformanceWarning';
+import { BuildMode } from './components/BuildMode/BuildMode';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useSceneStore } from './stores/sceneStore';
+import { useBuildModeStore } from './stores/buildModeStore';
 import { useSettingsStore } from './stores/settingsStore';
 import { usePoseTrackingStore } from './stores/poseTrackingStore';
 import type { SceneObject } from './types/scene.types';
@@ -25,7 +26,7 @@ function App() {
   const [selectedType, setSelectedType] = useState<SceneObject['type']>('box');
   const [selectedColor, setSelectedColor] = useState('#3b82f6');
   const [selectedSize, setSelectedSize] = useState(1.0);
-  const toggleBuildMode = useSceneStore((state) => state.toggleBuildMode);
+  const toggleBuildMode = useBuildModeStore((state) => state.toggleBuildMode);
 
   // Debug toggles
   const showDepthBreakdown = useSettingsStore((state) => state.showDepthBreakdown);
@@ -109,6 +110,9 @@ function App() {
       {/* Performance Warning */}
       <PerformanceWarning />
 
+      {/* Build Mode Banner & UI */}
+      <BuildMode />
+
       {/* Gesture Status Widget */}
       {showGestureWidget && <GestureStatusWidget compact={compactGestureWidget} />}
 
@@ -154,8 +158,9 @@ function App() {
           <li>• <strong>Right-click</strong> object to edit properties</li>
           <li>• Press <strong>H</strong> to toggle status panel</li>
           <li>• Press <strong>S</strong> to open settings</li>
-          <li>• Press <strong>G</strong> to toggle gesture widget (compact mode)</li>
           <li>• Press <strong>B</strong> to toggle build mode</li>
+          <li>• Press <strong>G</strong> to toggle grid snap (in build mode)</li>
+          <li>• Press <strong>ESC</strong> to cancel build mode</li>
           <li>• Press <strong>P</strong> to toggle pose skeleton (debug)</li>
           <li>• Press <strong>D</strong> to toggle depth breakdown (debug)</li>
         </ul>
