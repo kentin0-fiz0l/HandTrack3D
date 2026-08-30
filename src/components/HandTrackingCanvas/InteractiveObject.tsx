@@ -75,9 +75,9 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
   useFrame(() => {
     if (!rigidBodyRef.current) return;
 
-    // Skip interaction if object is locked or in build mode
+    // Skip interaction if object is locked, static, or in build mode
     const buildMode = useSceneStore.getState().buildMode;
-    if (properties.locked || buildMode) {
+    if (properties.locked || properties.isStatic || buildMode) {
       setIsNearHand(false);
       return;
     }
@@ -147,6 +147,7 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
       ref={rigidBodyRef}
       position={position}
       rotation={rotation}
+      type={properties.isStatic ? 'fixed' : 'dynamic'}
       mass={properties.mass}
       restitution={properties.restitution}
       friction={properties.friction}

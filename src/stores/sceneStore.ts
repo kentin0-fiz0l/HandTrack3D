@@ -16,6 +16,7 @@ const DEFAULT_OBJECT_PROPERTIES: ObjectProperties = {
   roughness: 0.5,
   locked: false,
   visible: true,
+  isStatic: false,
 };
 
 const MAX_OBJECTS = 50; // Performance budget
@@ -29,7 +30,7 @@ interface SceneStore {
   ghostPreview: SceneObject | null;
 
   addObject: (object: SceneObject) => void;
-  setObjects: (objects: SceneObject[]) => void;
+  setObjects: (objects: SceneObject[], properties?: Map<string, ObjectProperties>) => void;
   clearObjects: () => void;
   removeObject: (id: string) => void;
   grabObject: (handId: string, objectId: string, offset: [number, number, number]) => void;
@@ -108,15 +109,22 @@ export const useSceneStore = create<SceneStore>((set, get) => ({
       };
     }),
 
-  setObjects: (objects) =>
+  setObjects: (objects, properties) =>
     set((state) => {
-      // Initialize properties for any objects that don't have them
-      const newProperties = new Map(state.objectProperties);
-      objects.forEach((obj) => {
-        if (!newProperties.has(obj.id)) {
-          newProperties.set(obj.id, { ...DEFAULT_OBJECT_PROPERTIES, color: obj.color });
-        }
-      });
+      // If properties are provided, use them; otherwise initialize defaults
+      let newProperties: Map<string, ObjectProperties>;
+
+      if (properties) {
+        newProperties = new Map(properties);
+      } else {
+        // Initialize properties for any objects that don't have them
+        newProperties = new Map(state.objectProperties);
+        objects.forEach((obj) => {
+          if (!newProperties.has(obj.id)) {
+            newProperties.set(obj.id, { ...DEFAULT_OBJECT_PROPERTIES, color: obj.color });
+          }
+        });
+      }
 
       return {
         objects,

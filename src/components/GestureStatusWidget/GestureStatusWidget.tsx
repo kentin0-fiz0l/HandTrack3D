@@ -35,7 +35,7 @@ export function GestureStatusWidget({ compact = false }: GestureStatusWidgetProp
         clearTimeout(autoHideTimer);
       }
     };
-  }, [hands.length]);
+  }, [hands.length, autoHideTimer]);
 
   // Don't render if not visible or no hands
   if (!visible || hands.length === 0) {

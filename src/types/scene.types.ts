@@ -31,4 +31,5 @@ export interface ObjectProperties {
   // Interaction properties
   locked: boolean; // Cannot be grabbed when true
   visible: boolean;
+  isStatic?: boolean; // Object is fixed in space (immune to physics)
 }

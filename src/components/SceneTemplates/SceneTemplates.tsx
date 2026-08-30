@@ -3,6 +3,7 @@ import { useSceneStore } from '@/stores/sceneStore';
 import { sceneTemplates, getTemplateById, type SceneTemplate } from '@/data/sceneTemplates';
 import {
   loadTemplate,
+  loadSavedScene,
   exportSceneToFile,
   importSceneFromFile,
   saveSceneToStorage,
@@ -19,6 +20,7 @@ export function SceneTemplates() {
   const [customScenes, setCustomScenes] = useState<SavedScene[]>(getCustomScenes());
 
   const objects = useSceneStore((state) => state.objects);
+  const objectProperties = useSceneStore((state) => state.objectProperties);
   const setObjects = useSceneStore((state) => state.setObjects);
   const clearObjects = useSceneStore((state) => state.clearObjects);
 
@@ -26,19 +28,20 @@ export function SceneTemplates() {
     const template = getTemplateById(templateId);
     if (!template) return;
 
-    const newObjects = loadTemplate(template);
-    setObjects(newObjects);
+    const { objects: newObjects, objectProperties: newProperties } = loadTemplate(template);
+    setObjects(newObjects, newProperties);
     setSelectedTemplate(templateId);
   };
 
   const handleLoadCustomScene = (scene: SavedScene) => {
-    setObjects(scene.objects);
+    const { objects: sceneObjects, objectProperties: sceneProperties } = loadSavedScene(scene);
+    setObjects(sceneObjects, sceneProperties);
   };
 
   const handleSaveToStorage = () => {
     if (!saveName.trim()) return;
 
-    saveSceneToStorage(saveName, saveDescription, objects);
+    saveSceneToStorage(saveName, saveDescription, objects, objectProperties);
     setCustomScenes(getCustomScenes());
     setShowSaveDialog(false);
     setSaveName('');
@@ -55,13 +58,14 @@ export function SceneTemplates() {
     if (!name) return;
 
     const description = prompt('Enter description (optional):', '');
-    exportSceneToFile(name, description || '', objects);
+    exportSceneToFile(name, description || '', objects, objectProperties);
   };
 
   const handleImport = async () => {
     try {
       const scene = await importSceneFromFile();
-      setObjects(scene.objects);
+      const { objects: sceneObjects, objectProperties: sceneProperties } = loadSavedScene(scene);
+      setObjects(sceneObjects, sceneProperties);
     } catch (error) {
       console.error('Failed to import scene:', error);
       alert('Failed to import scene. Please check the file format.');

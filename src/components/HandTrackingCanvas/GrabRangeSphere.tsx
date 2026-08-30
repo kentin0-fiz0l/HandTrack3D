@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -14,7 +14,11 @@ export function GrabRangeSphere({ position, handId }: GrabRangeSphereProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const grabRange = useSettingsStore((state) => state.grabRange);
   const grabbedObjects = useSceneStore((state) => state.grabbedObjects);
-  const getNearObjects = useSceneStore((state) => state.getNearObjects);
+
+  // Get getNearObjects using getState() to avoid subscription
+  const getNearObjects = useCallback(() => {
+    return useSceneStore.getState().getNearObjects;
+  }, []);
 
   // Determine sphere state based on proximity and grab status
   const sphereState = useMemo(() => {
@@ -23,7 +27,7 @@ export function GrabRangeSphere({ position, handId }: GrabRangeSphereProps) {
       return { color: '#f97316', opacity: 0.2, scale: 1.0 }; // Orange - grabbed
     }
 
-    const nearObjects = getNearObjects(position, grabRange);
+    const nearObjects = getNearObjects()(position, grabRange);
     if (nearObjects.length > 0) {
       return { color: '#10b981', opacity: 0.15, scale: 1.05 }; // Green - grabbable
     }

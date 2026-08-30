@@ -41,9 +41,9 @@ export const SETTINGS_PRESETS: Record<string, SettingsPreset> = {
     settings: {
       // Gesture Settings - Lower thresholds = faster detection
       pinchThreshold: 0.03, // Very sensitive (fingers barely touching)
-      fingerExtensionAngle: 140, // Easier to trigger open hand
+      fingerExtensionAngle: 150, // Easier to trigger open hand
       fistCurlThreshold: 0.10, // Loose fist acceptable
-      pointExtensionAngle: 140, // Easier to trigger point
+      pointExtensionAngle: 150, // Easier to trigger point
       swipeVelocityThreshold: 0.3, // Low velocity needed for swipes
       swipeCooldown: 300, // Fast repeat swipes (300ms)
 
@@ -91,9 +91,9 @@ export const SETTINGS_PRESETS: Record<string, SettingsPreset> = {
     settings: {
       // Gesture Settings - Higher thresholds = more precise
       pinchThreshold: 0.07, // Requires clear pinch
-      fingerExtensionAngle: 175, // Very strict open hand (fingers must be straight)
+      fingerExtensionAngle: 170, // Very strict open hand (fingers must be straight)
       fistCurlThreshold: 0.20, // Tight fist required
-      pointExtensionAngle: 175, // Very strict point (index must be straight)
+      pointExtensionAngle: 170, // Very strict point (index must be straight)
       swipeVelocityThreshold: 0.8, // High velocity needed (reduces accidental swipes)
       swipeCooldown: 1000, // Slower repeat (1000ms prevents accidental swipes)
 
@@ -114,6 +114,24 @@ export const SETTINGS_PRESETS: Record<string, SettingsPreset> = {
  */
 export function getPreset(id: string): SettingsPreset | undefined {
   return SETTINGS_PRESETS[id];
+}
+
+/**
+ * Get preset by ID (alias for compatibility with tests)
+ */
+export function getPresetById(id: string): SettingsPreset | undefined {
+  return getPreset(id);
+}
+
+/**
+ * Check if current settings match a preset
+ */
+export function matchesPreset(
+  currentSettings: SettingsPreset['settings'],
+  preset: SettingsPreset
+): boolean {
+  const keys = Object.keys(preset.settings) as Array<keyof SettingsPreset['settings']>;
+  return keys.every((key) => currentSettings[key] === preset.settings[key]);
 }
 
 /**

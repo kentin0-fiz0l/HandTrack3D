@@ -152,6 +152,13 @@ export function ObjectPropertyEditor() {
         <h4 className="text-sm font-semibold mb-2 text-green-400">Interaction</h4>
 
         <PropertyToggle
+          label="Static"
+          value={properties.isStatic ?? false}
+          onChange={(val) => updateProperty('isStatic', val)}
+          description="Immune to gravity, cannot be grabbed"
+        />
+
+        <PropertyToggle
           label="Locked"
           value={properties.locked}
           onChange={(val) => updateProperty('locked', val)}

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { SettingsPreset } from '@/data/settingsPresets';
 
 interface SettingsStore {
@@ -99,67 +100,74 @@ const DEFAULT_SETTINGS = {
   poseTrackingEnabled: true, // Enable pose tracking (disable for better performance on slow devices)
 };
 
-export const useSettingsStore = create<SettingsStore>((set) => ({
-  ...DEFAULT_SETTINGS,
-  currentPreset: 'balanced', // Default preset
+export const useSettingsStore = create<SettingsStore>()(
+  persist(
+    (set) => ({
+      ...DEFAULT_SETTINGS,
+      currentPreset: 'balanced', // Default preset
 
-  reset: () => set({ ...DEFAULT_SETTINGS, currentPreset: 'balanced' }),
+      reset: () => set({ ...DEFAULT_SETTINGS, currentPreset: 'balanced' }),
 
-  applyPreset: (preset: SettingsPreset) =>
-    set({
-      ...preset.settings,
-      // Visual settings are not affected by presets
-      showTrails: true,
-      showWebcam: false,
-      showHandSkeleton: true,
-      showPerformance: true,
-      showGrabRange: true,
-      showPoseSkeleton: false,
-      showDepthBreakdown: false,
-      showGestureWidget: true,
-      compactGestureWidget: false,
-      // Physics boolean settings not affected by presets
-      gravityEnabled: true,
-      // Tracking maxHands not affected by presets
-      maxHands: 2,
-      currentPreset: preset.id,
+      applyPreset: (preset: SettingsPreset) =>
+        set({
+          ...preset.settings,
+          // Visual settings are not affected by presets
+          showTrails: true,
+          showWebcam: false,
+          showHandSkeleton: true,
+          showPerformance: true,
+          showGrabRange: true,
+          showPoseSkeleton: false,
+          showDepthBreakdown: false,
+          showGestureWidget: true,
+          compactGestureWidget: false,
+          // Physics boolean settings not affected by presets
+          gravityEnabled: true,
+          // Tracking maxHands not affected by presets
+          maxHands: 2,
+          currentPreset: preset.id,
+        }),
+
+      updateGestureSetting: (key, value) =>
+        set((state) => ({
+          ...state,
+          [key]: value,
+          currentPreset: null, // Mark as custom when manually changed
+        })),
+
+      updatePhysicsSetting: (key, value) =>
+        set((state) => ({
+          ...state,
+          [key]: value,
+          currentPreset: null, // Mark as custom when manually changed
+        })),
+
+      updateTrackingSetting: (key, value) =>
+        set((state) => ({
+          ...state,
+          [key]: value,
+          currentPreset: null, // Mark as custom when manually changed
+        })),
+
+      updateVisualSetting: (key, value) =>
+        set((state) => ({
+          ...state,
+          [key]: value,
+          // Visual settings don't affect preset status
+        })),
+
+      updatePerformanceSetting: (key, value) =>
+        set((state) => ({
+          ...state,
+          [key]: value,
+          // Performance settings don't affect preset status
+        })),
     }),
-
-  updateGestureSetting: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: value,
-      currentPreset: null, // Mark as custom when manually changed
-    })),
-
-  updatePhysicsSetting: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: value,
-      currentPreset: null, // Mark as custom when manually changed
-    })),
-
-  updateTrackingSetting: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: value,
-      currentPreset: null, // Mark as custom when manually changed
-    })),
-
-  updateVisualSetting: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: value,
-      // Visual settings don't affect preset status
-    })),
-
-  updatePerformanceSetting: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: value,
-      // Performance settings don't affect preset status
-    })),
-}));
+    {
+      name: 'handtrack3d-settings',
+    }
+  )
+);
 
 // Helper function to get settings outside of React components
 export const getSettings = () => useSettingsStore.getState();

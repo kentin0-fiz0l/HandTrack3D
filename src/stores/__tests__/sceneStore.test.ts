@@ -378,5 +378,78 @@ describe('sceneStore', () => {
         expect(useSceneStore.getState().selectedObjectId).toBe('sphere-1');
       });
     });
+
+    describe('setObjects with properties', () => {
+      it('should load objects with provided properties', () => {
+        const { setObjects, getObjectProperty } = useSceneStore.getState();
+
+        const newObjects = [
+          {
+            id: 'new-box',
+            type: 'box' as const,
+            position: [0, 0, 0] as [number, number, number],
+            rotation: [0, 0, 0] as [number, number, number],
+            scale: 1,
+            color: '#ff0000',
+          },
+        ];
+
+        const newProperties = new Map();
+        newProperties.set('new-box', {
+          mass: 5.0,
+          restitution: 0.9,
+          friction: 0.3,
+          linearDamping: 0.1,
+          angularDamping: 0.2,
+          gravityScale: 1.5,
+          color: '#ff0000',
+          emissiveIntensity: 0.5,
+          metalness: 0.8,
+          roughness: 0.2,
+          locked: true,
+          visible: true,
+        });
+
+        setObjects(newObjects, newProperties);
+
+        expect(getObjectProperty('new-box', 'mass')).toBe(5.0);
+        expect(getObjectProperty('new-box', 'restitution')).toBe(0.9);
+        expect(getObjectProperty('new-box', 'locked')).toBe(true);
+      });
+
+      it('should initialize default properties when no properties provided', () => {
+        const { setObjects, getObjectProperty } = useSceneStore.getState();
+
+        const newObjects = [
+          {
+            id: 'default-box',
+            type: 'box' as const,
+            position: [0, 0, 0] as [number, number, number],
+            rotation: [0, 0, 0] as [number, number, number],
+            scale: 1,
+            color: '#00ff00',
+          },
+        ];
+
+        setObjects(newObjects);
+
+        expect(getObjectProperty('default-box', 'mass')).toBe(1.0);
+        expect(getObjectProperty('default-box', 'friction')).toBe(0.7);
+        expect(getObjectProperty('default-box', 'locked')).toBe(false);
+      });
+
+      it('should preserve existing properties when not provided', () => {
+        const { setObjects, setObjectProperty, getObjectProperty } = useSceneStore.getState();
+
+        // Set custom property on existing object
+        setObjectProperty('box-1', 'mass', 3.0);
+
+        const existingObjects = useSceneStore.getState().objects;
+        setObjects(existingObjects); // Load same objects without properties
+
+        // Should still have the custom property since we passed the existing objects
+        expect(getObjectProperty('box-1', 'mass')).toBe(3.0);
+      });
+    });
   });
 });

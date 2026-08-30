@@ -14,10 +14,27 @@ import { InteractiveObject } from './InteractiveObject';
 import { PerformanceTracker } from '@/components/PerformanceMonitor/PerformanceTracker';
 import { BuildModeController } from '@/components/BuildMode/BuildModeController';
 import { GhostPreview } from '@/components/BuildMode/GhostPreview';
+import { SpotlightTracker } from '@/components/Tutorial/SpotlightTracker';
 import { mapHandTo3D } from '@/utils/coordinateMapping';
 import { useThree } from '@react-three/fiber';
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useCallback, Profiler } from 'react';
+import { shallow } from 'zustand/shallow';
 import type { SceneObject } from '@/types/scene.types';
+
+// Performance measurement callback for React Profiler
+const onRenderCallback = (
+  id: string,
+  phase: 'mount' | 'update',
+  actualDuration: number,
+  baseDuration: number,
+  startTime: number,
+  commitTime: number
+) => {
+  if (phase === 'update' && actualDuration > 16) {
+    // Log only updates that take longer than one frame (16ms at 60fps)
+    console.log(`[Scene3D Profiler] ${phase}: ${actualDuration.toFixed(2)}ms`);
+  }
+};
 
 interface Scene3DProps {
   selectedType?: SceneObject['type'];
@@ -30,22 +47,45 @@ export function Scene3D({
   selectedColor = '#3b82f6',
   selectedSize = 1.0,
 }: Scene3DProps) {
-  const objects = useSceneStore((state) => state.objects);
+  // Optimized store subscriptions with selectors and shallow equality
+  const { objects, buildMode, grabbedObjects } = useSceneStore(
+    (state) => ({
+      objects: state.objects,
+      buildMode: state.buildMode,
+      grabbedObjects: state.grabbedObjects,
+    }),
+    shallow
+  );
+
   const cursors = useHandCursorStore((state) => state.cursors);
   const gravityEnabled = useSettingsStore((state) => state.gravityEnabled);
-  const buildMode = useSceneStore((state) => state.buildMode);
   const hands = useHandTrackingStore((state) => state.hands);
   const gestures = useGestureStore((state) => state.gestures);
-  const grabbedObjects = useSceneStore((state) => state.grabbedObjects);
-  const getNearObjects = useSceneStore((state) => state.getNearObjects);
   const grabRange = useSettingsStore((state) => state.grabRange);
+
+  // Action subscriptions (functions don't need reactive subscriptions)
   const updateTutorialState = useTutorialStore((state) => state.updateTutorialState);
   const incrementGestureCount = useHintsStore((state) => state.incrementGestureCount);
   const incrementCameraRotations = useHintsStore((state) => state.incrementCameraRotations);
+
   const { camera, size } = useThree();
 
   // Track previous gestures to detect changes
   const prevGesturesRef = useRef<Map<string, string>>(new Map());
+
+  // Get getNearObjects function using getState() to avoid subscription
+  const getNearObjects = useCallback(() => {
+    return useSceneStore.getState().getNearObjects;
+  }, []);
+
+  // Development: Track render count
+  const renderCountRef = useRef(0);
+  useEffect(() => {
+    renderCountRef.current += 1;
+    if (renderCountRef.current % 10 === 0) {
+      console.log(`[Scene3D] Rendered ${renderCountRef.current} times`);
+    }
+  });
 
   // Map hand positions to 3D space
   useHandTo3DMapping();
@@ -82,7 +122,7 @@ export function Scene3D({
   useEffect(() => {
     // Track near object and grabbed object
     if (cursors.length > 0) {
-      const nearObjects = getNearObjects(cursors[0].position, grabRange);
+      const nearObjects = getNearObjects()(cursors[0].position, grabRange);
       const isGrabbing = grabbedObjects.size > 0;
       updateTutorialState({
         nearObject: nearObjects.length > 0,
@@ -116,7 +156,10 @@ export function Scene3D({
   }, [hands, camera, size.width, size.height]);
 
   return (
-    <>
+    <Profiler id="Scene3D" onRender={onRenderCallback}>
+      {/* Spotlight tracker - updates global camera/canvas reference for tutorial spotlight */}
+      <SpotlightTracker />
+
       {/* Performance tracking */}
       <PerformanceTracker />
 
@@ -192,6 +235,6 @@ export function Scene3D({
           <GhostPreview />
         </>
       )}
-    </>
+    </Profiler>
   );
 }
