@@ -14,6 +14,8 @@ const DEFAULT_OBJECT_PROPERTIES: ObjectProperties = {
   emissiveIntensity: 0.0,
   metalness: 0.0,
   roughness: 0.5,
+  scale: 1.0,
+  opacity: 1.0,
   locked: false,
   visible: true,
   isStatic: false,

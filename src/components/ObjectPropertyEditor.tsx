@@ -1,5 +1,6 @@
 import { useSceneStore } from '@/stores/sceneStore';
 import type { ObjectProperties } from '@/types/scene.types';
+import { useEffect, useRef } from 'react';
 
 export function ObjectPropertyEditor() {
   const selectedObjectId = useSceneStore((state) => state.selectedObjectId);
@@ -9,6 +10,37 @@ export function ObjectPropertyEditor() {
   const resetObjectProperties = useSceneStore((state) => state.resetObjectProperties);
   const selectObject = useSceneStore((state) => state.selectObject);
   const removeObject = useSceneStore((state) => state.removeObject);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // ESC key handler to close panel
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && selectedObjectId) {
+        selectObject(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedObjectId, selectObject]);
+
+  // Click-outside handler to close panel
+  useEffect(() => {
+    if (!selectedObjectId) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        // Don't close if clicking on the 3D canvas (right-click to select another object)
+        if ((event.target as HTMLElement).tagName === 'CANVAS') {
+          return;
+        }
+        selectObject(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [selectedObjectId, selectObject]);
 
   // If no object selected, show instructions
   if (!selectedObjectId) {
@@ -34,7 +66,7 @@ export function ObjectPropertyEditor() {
   };
 
   return (
-    <div className="absolute top-20 right-4 bg-gray-900/95 text-white p-4 rounded-lg shadow-xl max-w-sm max-h-[80vh] overflow-y-auto">
+    <div ref={panelRef} className="absolute top-20 right-4 bg-gray-900/95 text-white p-4 rounded-lg shadow-xl max-w-sm max-h-[80vh] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -117,6 +149,24 @@ export function ObjectPropertyEditor() {
           label="Color"
           value={properties.color}
           onChange={(val) => updateProperty('color', val)}
+        />
+
+        <PropertySlider
+          label="Scale"
+          value={properties.scale}
+          min={0.5}
+          max={3}
+          step={0.1}
+          onChange={(val) => updateProperty('scale', val)}
+        />
+
+        <PropertySlider
+          label="Opacity"
+          value={properties.opacity}
+          min={0}
+          max={1}
+          step={0.05}
+          onChange={(val) => updateProperty('opacity', val)}
         />
 
         <PropertySlider

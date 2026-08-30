@@ -130,7 +130,7 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
     }
   });
 
-  const { type, position, rotation, scale } = object;
+  const { type, position, rotation, scale: objectScale } = object;
 
   // Don't render if invisible
   if (!properties.visible) {
@@ -157,6 +157,9 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
     ? 0.3
     : properties.emissiveIntensity;
 
+  // Apply property scale on top of object scale
+  const finalScale = objectScale * properties.scale;
+
   return (
     <RigidBody
       ref={rigidBodyRef}
@@ -177,7 +180,7 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
       {type === 'cone' && <CylinderCollider args={[0.5, 0.25]} />}
       {type === 'capsule' && <CapsuleCollider args={[0.5, 0.25]} />}
 
-      <mesh ref={meshRef} scale={scale} castShadow>
+      <mesh ref={meshRef} scale={finalScale} castShadow>
         {type === 'box' && <boxGeometry args={[1, 1, 1]} />}
         {type === 'sphere' && <sphereGeometry args={[0.5, 32, 32]} />}
         {type === 'torus' && <torusGeometry args={[0.5, 0.2, 16, 32]} />}
@@ -189,6 +192,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
               emissiveIntensity={emissiveIntensity}
               metalness={properties.metalness}
               roughness={properties.roughness}
+              transparent={properties.opacity < 1.0}
+              opacity={properties.opacity}
             />
           </Cylinder>
         )}
@@ -200,6 +205,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
               emissiveIntensity={emissiveIntensity}
               metalness={properties.metalness}
               roughness={properties.roughness}
+              transparent={properties.opacity < 1.0}
+              opacity={properties.opacity}
             />
           </Cone>
         )}
@@ -211,6 +218,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
               emissiveIntensity={emissiveIntensity}
               metalness={properties.metalness}
               roughness={properties.roughness}
+              transparent={properties.opacity < 1.0}
+              opacity={properties.opacity}
             />
           </Capsule>
         )}
@@ -221,6 +230,8 @@ export function InteractiveObject({ object }: InteractiveObjectProps) {
             emissiveIntensity={emissiveIntensity}
             metalness={properties.metalness}
             roughness={properties.roughness}
+            transparent={properties.opacity < 1.0}
+            opacity={properties.opacity}
           />
         )}
       </mesh>

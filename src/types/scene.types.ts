@@ -27,6 +27,8 @@ export interface ObjectProperties {
   emissiveIntensity: number; // 0.0 - 1.0
   metalness: number; // 0.0 - 1.0
   roughness: number; // 0.0 - 1.0
+  scale: number; // 0.5 - 3.0
+  opacity: number; // 0.0 - 1.0
 
   // Interaction properties
   locked: boolean; // Cannot be grabbed when true
