@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { sensorFusion, type HandState, type FusedHandState } from '@/services/sensorFusion/SensorFusionService';
 import { usePositioningStore } from '@/stores/positioningStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
+import { useIMUOrientation } from './useIMUOrientation';
 import * as THREE from 'three';
 
 /**
@@ -15,6 +16,7 @@ import * as THREE from 'three';
 export function useSensorFusion() {
   const { roomPosition, positioningMode, enablePositioning } = usePositioningStore();
   const cursors = useHandCursorStore((state) => state.cursors);
+  const { orientation: imuOrientation } = useIMUOrientation();
   const lastRoomPositionRef = useRef<[number, number, number] | null>(null);
 
   // Update camera pose from WiFi positioning
@@ -46,11 +48,12 @@ export function useSensorFusion() {
         const position = new THREE.Vector3(x, y, z);
         const accuracy = usePositioningStore.getState().positionAccuracy || 2.5;
 
-        sensorFusion.updateCameraPose(position, accuracy);
+        // Pass IMU orientation (or undefined for identity fallback)
+        sensorFusion.updateCameraPose(position, accuracy, imuOrientation || undefined);
         lastRoomPositionRef.current = [x, y, z];
       }
     }
-  }, [roomPosition, positioningMode, enablePositioning]);
+  }, [roomPosition, positioningMode, enablePositioning, imuOrientation]);
 
   // Update hand tracking for sensor fusion
   useEffect(() => {

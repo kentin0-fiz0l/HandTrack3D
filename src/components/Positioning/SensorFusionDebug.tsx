@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSensorFusion } from '@/hooks/useSensorFusion';
 import { usePositioningStore } from '@/stores/positioningStore';
+import { useIMUOrientation } from '@/hooks/useIMUOrientation';
 
 /**
  * Sensor fusion debug panel
@@ -14,6 +15,7 @@ import { usePositioningStore } from '@/stores/positioningStore';
 export function SensorFusionDebug() {
   const { sensorFusion, isFusionActive } = useSensorFusion();
   const { positioningMode, enablePositioning } = usePositioningStore();
+  const { eulerAngles, isAvailable, permissionState, requestPermission } = useIMUOrientation();
   const [stats, setStats] = useState({
     activeFilters: 0,
     cameraPoseAvailable: false,
@@ -79,6 +81,50 @@ export function SensorFusionDebug() {
             ±{stats.averageUncertainty.toFixed(3)}m
           </span>
         </div>
+      </div>
+
+      {/* IMU Status */}
+      <div className="border-t border-purple-700/30 pt-2 mb-3">
+        <div className="flex justify-between">
+          <span className="text-gray-400">IMU Orientation:</span>
+          <span
+            className={`font-mono ${
+              isAvailable && permissionState === 'granted'
+                ? 'text-green-400'
+                : 'text-gray-500'
+            }`}
+          >
+            {isAvailable && permissionState === 'granted' ? 'Active' : 'Unavailable'}
+          </span>
+        </div>
+
+        {/* Euler Angles (when IMU active) */}
+        {eulerAngles && isAvailable && permissionState === 'granted' && (
+          <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+            <div className="flex justify-between">
+              <span>α (yaw):</span>
+              <span className="font-mono text-white">{eulerAngles.alpha.toFixed(1)}°</span>
+            </div>
+            <div className="flex justify-between">
+              <span>β (pitch):</span>
+              <span className="font-mono text-white">{eulerAngles.beta.toFixed(1)}°</span>
+            </div>
+            <div className="flex justify-between">
+              <span>γ (roll):</span>
+              <span className="font-mono text-white">{eulerAngles.gamma.toFixed(1)}°</span>
+            </div>
+          </div>
+        )}
+
+        {/* iOS Permission Button */}
+        {permissionState === 'prompt' && (
+          <button
+            onClick={requestPermission}
+            className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-xs py-1.5 px-2 rounded transition-colors"
+          >
+            Enable IMU (iOS)
+          </button>
+        )}
       </div>
 
       {/* Per-Hand Stats */}

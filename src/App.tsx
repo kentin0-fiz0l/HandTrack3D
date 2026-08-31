@@ -14,7 +14,7 @@ import { TrackingErrorDisplay } from './components/ErrorDisplay/TrackingErrorDis
 import { LoadingOverlay } from './components/Loading/LoadingOverlay';
 import { PerformanceWarning } from './components/Performance/PerformanceWarning';
 import { BuildMode } from './components/BuildMode/BuildMode';
-import { PositioningStatus, CalibrationWizard, SensorFusionDebug } from './components/Positioning';
+import { PositioningStatus, CalibrationWizard, SensorFusionDebug, IMUPermissionPrompt } from './components/Positioning';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useWiFiPositioning } from './hooks/useWiFiPositioning';
 import { useSensorFusion } from './hooks/useSensorFusion';
@@ -131,6 +131,9 @@ function App() {
 
       {/* Sensor Fusion Debug Panel */}
       <SensorFusionDebug />
+
+      {/* IMU Permission Prompt (iOS) */}
+      <IMUPermissionPrompt />
 
       {/* Depth Breakdown Debug Panel */}
       <DepthBreakdownPanel show={showDepthBreakdown} />

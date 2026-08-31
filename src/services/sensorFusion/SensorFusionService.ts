@@ -73,20 +73,27 @@ export class SensorFusionService {
    * Update camera pose from WiFi positioning
    * @param position - Room position from WiFi trilateration
    * @param accuracy - Position uncertainty in meters
+   * @param orientation - Optional camera orientation from IMU (defaults to identity)
    */
-  updateCameraPose(position: THREE.Vector3, accuracy: number): void {
+  updateCameraPose(
+    position: THREE.Vector3,
+    accuracy: number,
+    orientation?: THREE.Quaternion
+  ): void {
     const now = Date.now();
 
     // Update or create camera pose
     this.cameraPose = {
       position: position.clone(),
-      orientation: new THREE.Quaternion(), // Identity (no rotation data yet)
+      orientation: orientation?.clone() || new THREE.Quaternion(), // Use IMU or identity
       timestamp: now,
       accuracy,
     };
 
     console.log(
-      `[Sensor Fusion] Camera pose updated: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) ±${accuracy.toFixed(2)}m`
+      `[Sensor Fusion] Camera pose updated: ` +
+      `pos=(${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) ±${accuracy.toFixed(2)}m, ` +
+      `orientation=${orientation ? 'IMU' : 'identity'}`
     );
   }
 
