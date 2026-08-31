@@ -1,0 +1,84 @@
+name: Question
+description: Ask a question about using HandTrack3D
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about HandTrack3D? We're here to help!
+
+        **Before asking**: Please check the [documentation](https://github.com/kentin0-fiz0l/HandTrack3D#readme) and [existing discussions](https://github.com/kentin0-fiz0l/HandTrack3D/discussions).
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Question Topic
+      description: What is your question about?
+      options:
+        - Installation & Setup
+        - Hand Tracking Configuration
+        - Gesture Recognition
+        - 3D Interaction (Three.js integration)
+        - Physics (Rapier integration)
+        - WiFi Positioning Setup
+        - Sensor Fusion & Kalman Filter
+        - Plugin System
+        - API Usage
+        - Performance Optimization
+        - Deployment
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: How do I configure the Kalman filter for better accuracy?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context about what you're trying to achieve
+      placeholder: |
+        I'm building a gesture-controlled interface and noticed the hand position jumps around when I move quickly.
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Relevant Code (Optional)
+      description: Share any code snippets that might help explain your question
+      render: typescript
+      placeholder: |
+        const tracker = new HandTracker();
+        // ... setup code
+
+  - type: dropdown
+    id: experience
+    attributes:
+      label: Experience Level
+      description: How familiar are you with HandTrack3D?
+      options:
+        - Just getting started
+        - Used for a few days
+        - Experienced user
+        - Contributor/Advanced
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I've read the documentation
+          required: false
+        - label: I've searched existing issues/discussions
+          required: false
+        - label: This is not a bug report (use Bug Report template instead)
+          required: true

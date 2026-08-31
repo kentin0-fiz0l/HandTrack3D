@@ -1,0 +1,134 @@
+name: Bug Report
+description: Report a bug or issue with HandTrack3D
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us investigate.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of HandTrack3D is affected?
+      options:
+        - Hand Tracking (MediaPipe)
+        - Gesture Recognition
+        - 3D Interaction (Three.js)
+        - Physics (Rapier)
+        - WiFi Positioning
+        - Sensor Fusion (Kalman Filter)
+        - UI/UX (Tutorial, Widgets)
+        - Build System
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Clear description of what's wrong
+      placeholder: |
+        Example: Hand tracking stops working after 2 minutes of use
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Open https://kentin0-fiz0l.github.io/HandTrack3D/
+        2. Allow webcam access
+        3. Wave hand for 2 minutes
+        4. Hand tracking freezes
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen?
+      placeholder: Hand tracking should continue indefinitely
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: Hand tracking stops after 2 minutes, console shows "MediaPipe connection lost"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser are you using?
+      options:
+        - Chrome
+        - Edge
+        - Firefox
+        - Safari
+        - Other (specify in additional context)
+    validations:
+      required: true
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser Version
+      description: What version? (e.g., Chrome 120.0.6099.109)
+      placeholder: "120.0.6099.109"
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other (specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: console-errors
+    attributes:
+      label: Console Errors
+      description: Any errors in the browser console? (Press F12 → Console tab)
+      render: shell
+      placeholder: |
+        Paste any error messages here
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Anything else we should know?
+      placeholder: |
+        - Screenshots
+        - Network conditions
+        - Hardware specs
+        - Related issues
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I've searched existing issues and this is not a duplicate
+          required: true
+        - label: I've checked the documentation
+          required: false
+        - label: I can reproduce this bug consistently
+          required: false

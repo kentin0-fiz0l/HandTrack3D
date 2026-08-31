@@ -1,0 +1,113 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for HandTrack3D
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible to help us evaluate and implement your idea.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: Which area would this feature belong to?
+      options:
+        - Hand Tracking (MediaPipe)
+        - Gesture Recognition
+        - 3D Interaction (Three.js)
+        - Physics (Rapier)
+        - WiFi Positioning
+        - Sensor Fusion (Kalman Filter)
+        - UI/UX (Tutorial, Widgets)
+        - Build System
+        - Documentation
+        - Plugin System
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What user need does it address?
+      placeholder: |
+        Example: As a developer, I want to track hand orientation (pitch/yaw/roll) so that I can build more realistic 3D interactions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: |
+        Example: Add an `orientation` field to the HandCursor type that returns a quaternion representing the hand's rotation in 3D space.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        Example: I tried estimating rotation from landmark positions, but it's not accurate enough for my use case.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Critical (blocking my project)
+        - High (would significantly improve my workflow)
+        - Medium (nice to have)
+        - Low (minor enhancement)
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your specific use case or what you're trying to build
+      placeholder: |
+        I'm building a VR training simulator where users need to rotate objects with precise hand movements.
+
+  - type: textarea
+    id: api-example
+    attributes:
+      label: API Example (Optional)
+      description: Show how you'd like to use this feature in code
+      render: typescript
+      placeholder: |
+        const cursor = cursors[0];
+        const orientation = cursor.orientation; // Quaternion { x, y, z, w }
+
+        // Apply to 3D object
+        object.quaternion.copy(orientation);
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help implement this feature
+          required: false
+        - label: I can provide test cases or examples
+          required: false
+        - label: I've searched existing issues and this is not a duplicate
+          required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, screenshots, or references
+      placeholder: |
+        - Related papers or libraries
+        - Screenshots or diagrams
+        - Links to similar implementations
