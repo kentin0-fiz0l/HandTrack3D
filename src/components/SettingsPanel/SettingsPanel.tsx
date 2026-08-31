@@ -405,13 +405,16 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                       >
                         <option value="disabled">Disabled</option>
                         <option value="wifi-only">WiFi Only</option>
-                        <option value="fusion">Sensor Fusion (WiFi + Camera)</option>
+                        <option value="uwb-only">UWB Only (Mock)</option>
+                        <option value="fusion">Sensor Fusion (All Sensors)</option>
                       </select>
                       <p className="text-xs text-gray-500 mt-1">
                         {positioning.positioningMode === 'wifi-only' &&
                           'Use only WiFi RSSI for positioning (±2-5m accuracy)'}
+                        {positioning.positioningMode === 'uwb-only' &&
+                          'Use UWB positioning for high accuracy (±10-30cm) - requires mock server'}
                         {positioning.positioningMode === 'fusion' &&
-                          'Combine WiFi and camera tracking for best accuracy'}
+                          'Combine all sensors (WiFi, UWB, IMU, Camera) for best accuracy'}
                         {positioning.positioningMode === 'disabled' && 'Positioning disabled'}
                       </p>
                     </div>

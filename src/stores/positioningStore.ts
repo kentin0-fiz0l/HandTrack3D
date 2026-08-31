@@ -38,7 +38,7 @@ export interface PositioningState {
 
   // Settings
   enablePositioning: boolean;
-  positioningMode: 'wifi-only' | 'fusion' | 'disabled';
+  positioningMode: 'wifi-only' | 'uwb-only' | 'fusion' | 'disabled';
   updateInterval: number; // milliseconds
 }
 

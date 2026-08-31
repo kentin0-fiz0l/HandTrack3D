@@ -1,7 +1,35 @@
 {
   "name": "handtrack3d",
+  "version": "0.4.0-alpha.0",
+  "description": "Extensible plugin platform for 3D hand interaction with WiFi positioning and sensor fusion",
+  "keywords": [
+    "hand-tracking",
+    "mediapipe",
+    "three-js",
+    "gesture-recognition",
+    "3d-interaction",
+    "computer-vision",
+    "webgl",
+    "react",
+    "typescript",
+    "wifi-positioning",
+    "sensor-fusion",
+    "kalman-filter",
+    "spatial-computing",
+    "room-scale",
+    "plugin-system"
+  ],
+  "homepage": "https://kentin0-fiz0l.github.io/HandTrack3D/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentin0-fiz0l/HandTrack3D.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kentin0-fiz0l/HandTrack3D/issues"
+  },
+  "author": "Kentino",
+  "license": "MIT",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "build": "turbo run build",
@@ -13,7 +41,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "uwb:mock": "cd tools/uwb-companion && npm install && npm start"
   },
   "dependencies": {
     "@handtrack3d/core": "workspace:*",

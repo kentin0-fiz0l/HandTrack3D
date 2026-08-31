@@ -3,13 +3,14 @@ import { sensorFusion, type HandState, type FusedHandState } from '@/services/se
 import { usePositioningStore } from '@/stores/positioningStore';
 import { useHandCursorStore } from '@/hooks/useHandTo3DMapping';
 import { useIMUOrientation } from './useIMUOrientation';
+import { useUWBPositioning } from './useUWBPositioning';
 import * as THREE from 'three';
 
 /**
- * Hook to manage sensor fusion between WiFi positioning and hand tracking
+ * Hook to manage sensor fusion between positioning (WiFi/UWB) and hand tracking
  *
  * Integrates:
- * - WiFi positioning updates → camera pose
+ * - WiFi/UWB positioning updates → camera pose
  * - Hand tracking updates → fused hand positions
  * - Outputs room-relative hand positions when fusion mode is active
  */
@@ -17,9 +18,15 @@ export function useSensorFusion() {
   const { roomPosition, positioningMode, enablePositioning } = usePositioningStore();
   const cursors = useHandCursorStore((state) => state.cursors);
   const { orientation: imuOrientation } = useIMUOrientation();
+
+  // UWB positioning (auto-connects when enabled)
+  const uwbState = useUWBPositioning({
+    autoConnect: positioningMode === 'uwb-only' || positioningMode === 'fusion',
+  });
+
   const lastRoomPositionRef = useRef<[number, number, number] | null>(null);
 
-  // Update camera pose from WiFi positioning
+  // Update camera pose from positioning (WiFi or UWB)
   useEffect(() => {
     if (!enablePositioning || positioningMode === 'disabled') {
       // Fusion disabled - reset service
@@ -33,27 +40,48 @@ export function useSensorFusion() {
       return;
     }
 
-    // Fusion mode - update camera pose when WiFi position changes
-    if (roomPosition) {
-      const [x, y, z] = roomPosition;
+    // Determine position source based on mode
+    let position: THREE.Vector3 | null = null;
+    let accuracy: number = 2.5; // Default WiFi accuracy
+
+    if (positioningMode === 'uwb-only' && uwbState.position) {
+      // Use UWB position
+      position = uwbState.position;
+      accuracy = 0.02; // ±2cm (average of ±10-30cm range)
+    } else if (positioningMode === 'fusion') {
+      // Prefer UWB if available, fallback to WiFi
+      if (uwbState.position) {
+        position = uwbState.position;
+        accuracy = 0.02;
+      } else if (roomPosition) {
+        const [x, y, z] = roomPosition;
+        position = new THREE.Vector3(x, y, z);
+        accuracy = usePositioningStore.getState().positionAccuracy || 2.5;
+      }
+    }
+
+    // Update camera pose if position available
+    if (position) {
       const prevPos = lastRoomPositionRef.current;
+      const currentPos: [number, number, number] = [
+        position.x,
+        position.y,
+        position.z,
+      ];
 
       // Check if position actually changed (avoid redundant updates)
       if (
         !prevPos ||
-        Math.abs(prevPos[0] - x) > 0.01 ||
-        Math.abs(prevPos[1] - y) > 0.01 ||
-        Math.abs(prevPos[2] - z) > 0.01
+        Math.abs(prevPos[0] - currentPos[0]) > 0.01 ||
+        Math.abs(prevPos[1] - currentPos[1]) > 0.01 ||
+        Math.abs(prevPos[2] - currentPos[2]) > 0.01
       ) {
-        const position = new THREE.Vector3(x, y, z);
-        const accuracy = usePositioningStore.getState().positionAccuracy || 2.5;
-
         // Pass IMU orientation (or undefined for identity fallback)
         sensorFusion.updateCameraPose(position, accuracy, imuOrientation || undefined);
-        lastRoomPositionRef.current = [x, y, z];
+        lastRoomPositionRef.current = currentPos;
       }
     }
-  }, [roomPosition, positioningMode, enablePositioning, imuOrientation]);
+  }, [roomPosition, positioningMode, enablePositioning, imuOrientation, uwbState.position]);
 
   // Update hand tracking for sensor fusion
   useEffect(() => {
@@ -103,5 +131,6 @@ export function useSensorFusion() {
     getFusedPosition,
     isFusionActive,
     sensorFusion, // Expose service for debugging
+    uwbState, // Expose UWB state for debugging
   };
 }
