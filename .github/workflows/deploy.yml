@@ -34,10 +34,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build project
+      - name: Build SDK packages
         run: pnpm build
 
-      - name: Copy showcase app build to root
+      - name: Build showcase app
+        run: pnpm exec vite build
+
+      - name: Prepare deployment directory
         run: |
           # The showcase app is built in ./dist
           # Copy it to a temporary location for Pages deployment
