@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import { KalmanFilter, type StateVector } from '@/utils/kalman/KalmanFilter';
+import { AdaptiveNoiseEstimator } from '@/utils/kalman/AdaptiveNoiseEstimator';
+import { RSSINoiseScaler, type WiFiSignalQuality } from '@/utils/kalman/RSSINoiseScaler';
+
+// Re-export WiFiSignalQuality for external use
+export type { WiFiSignalQuality };
 
 /**
  * Hand state with position and tracking metadata
@@ -17,9 +22,10 @@ export interface HandState {
  */
 export interface CameraPose {
   position: THREE.Vector3; // Room position (from WiFi)
-  orientation: THREE.Quaternion; // Camera orientation (future: IMU)
+  orientation: THREE.Quaternion; // Camera orientation (from IMU)
   timestamp: number;
   accuracy: number; // Position uncertainty in meters
+  signalQuality?: WiFiSignalQuality; // WiFi signal quality (for adaptive filtering)
 }
 
 /**
@@ -52,6 +58,12 @@ export class SensorFusionService {
   // Kalman filters for each hand (room-relative position tracking)
   private filters: Map<string, KalmanFilter>;
 
+  // Adaptive noise estimators (one per hand)
+  private noiseEstimators: Map<string, AdaptiveNoiseEstimator>;
+
+  // RSSI-based noise scaler (shared across hands)
+  private rssiScaler: RSSINoiseScaler;
+
   // Current camera pose in room
   private cameraPose: CameraPose | null;
 
@@ -59,12 +71,17 @@ export class SensorFusionService {
   private fusedStates: Map<string, FusedHandState>;
 
   // Configuration
-  private readonly cameraNoiseStd = 0.01; // 1cm camera noise
-  private readonly wifiNoiseStd = 2.5; // 2.5m WiFi noise
-  private readonly processNoise = 0.05; // 5cm process noise
+  private readonly cameraNoiseStd = 0.01; // 1cm camera noise (fallback)
+  private readonly wifiNoiseStd = 2.5; // 2.5m WiFi noise (fallback)
+  private readonly processNoise = 0.05; // 5cm process noise (fallback)
+
+  // Enable/disable adaptive filtering
+  private adaptiveFilteringEnabled = true;
 
   constructor() {
     this.filters = new Map();
+    this.noiseEstimators = new Map();
+    this.rssiScaler = new RSSINoiseScaler();
     this.fusedStates = new Map();
     this.cameraPose = null;
   }
@@ -74,11 +91,13 @@ export class SensorFusionService {
    * @param position - Room position from WiFi trilateration
    * @param accuracy - Position uncertainty in meters
    * @param orientation - Optional camera orientation from IMU (defaults to identity)
+   * @param signalQuality - Optional WiFi signal quality (for adaptive filtering)
    */
   updateCameraPose(
     position: THREE.Vector3,
     accuracy: number,
-    orientation?: THREE.Quaternion
+    orientation?: THREE.Quaternion,
+    signalQuality?: WiFiSignalQuality
   ): void {
     const now = Date.now();
 
@@ -88,12 +107,14 @@ export class SensorFusionService {
       orientation: orientation?.clone() || new THREE.Quaternion(), // Use IMU or identity
       timestamp: now,
       accuracy,
+      signalQuality, // Store for adaptive filtering
     };
 
     console.log(
       `[Sensor Fusion] Camera pose updated: ` +
       `pos=(${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) ±${accuracy.toFixed(2)}m, ` +
-      `orientation=${orientation ? 'IMU' : 'identity'}`
+      `orientation=${orientation ? 'IMU' : 'identity'}, ` +
+      `RSSI=${signalQuality ? signalQuality.minRSSI.toFixed(0) + 'dBm' : 'N/A'}`
     );
   }
 
@@ -123,8 +144,10 @@ export class SensorFusionService {
       // Transform hand position to room coordinates
       const roomPosition = this.transformCameraToRoom(hand.position);
 
-      // Get or create Kalman filter for this hand
+      // Get or create Kalman filter and noise estimator for this hand
       let filter = this.filters.get(hand.id);
+      let estimator = this.noiseEstimators.get(hand.id);
+
       if (!filter) {
         // Initialize filter with current position (zero velocity)
         const initialState: StateVector = [
@@ -136,17 +159,54 @@ export class SensorFusionService {
           0,
         ];
         filter = new KalmanFilter(initialState, this.processNoise);
+        estimator = new AdaptiveNoiseEstimator();
         this.filters.set(hand.id, filter);
+        this.noiseEstimators.set(hand.id, estimator);
         console.log(`[Sensor Fusion] Created Kalman filter for ${hand.id} hand`);
       }
 
       // Kalman predict step (based on motion model)
       filter.predict();
 
+      // ADAPTIVE NOISE ESTIMATION (Phase 4E)
+      if (this.adaptiveFilteringEnabled && estimator) {
+        // 1. Compute innovation (prediction error)
+        const innovation = filter.getInnovation([
+          roomPosition.x,
+          roomPosition.y,
+          roomPosition.z,
+        ]);
+
+        // 2. Update measurement noise estimate from innovation
+        const covariance = filter.getPositionCovariance();
+        estimator.updateMeasurementNoise(innovation, covariance);
+
+        // 3. Update process noise estimate from motion
+        const velocity = filter.getVelocity();
+        estimator.updateProcessNoise(velocity, 0.033); // 30Hz ≈ 33ms
+
+        // 4. Get adaptive noise estimates
+        const noiseEst = estimator.getNoiseEstimate();
+
+        // 5. Scale R based on WiFi signal quality (if available)
+        let adaptiveR = noiseEst.measurement;
+        if (this.cameraPose.signalQuality) {
+          const scaling = this.rssiScaler.computeScaling(this.cameraPose.signalQuality);
+          adaptiveR = adaptiveR * scaling;
+        }
+
+        // 6. Apply adaptive noise to filter (if confident enough)
+        if (noiseEst.confidence > 0.3) {
+          filter.setMeasurementNoise(adaptiveR);
+          filter.setProcessNoise(noiseEst.process);
+        }
+      }
+
       // Kalman update step (with camera measurement)
+      // If adaptive filtering disabled, uses default cameraNoiseStd
       filter.update(
         [roomPosition.x, roomPosition.y, roomPosition.z],
-        this.cameraNoiseStd,
+        this.cameraNoiseStd, // Fallback if adaptive disabled
         'camera'
       );
 

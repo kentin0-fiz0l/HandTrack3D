@@ -26,6 +26,10 @@ export class KalmanFilter {
   // Process noise covariance (6x6)
   private Q: number[][];
 
+  // Measurement noise standard deviation (meters)
+  // Can be updated dynamically for adaptive filtering
+  private R: number = 0.01; // Default: 1cm (camera accuracy)
+
   // Time of last update (for dt calculation)
   private lastUpdateTime: number;
 
@@ -180,6 +184,71 @@ export class KalmanFilter {
     this.state = [...newState];
     this.P = this.createIdentityMatrix(6, 10.0);
     this.lastUpdateTime = Date.now() / 1000;
+  }
+
+  /**
+   * Update measurement noise (R) dynamically for adaptive filtering
+   *
+   * @param R - New measurement noise standard deviation (meters)
+   */
+  setMeasurementNoise(R: number): void {
+    // Ensure R is positive and reasonable (minimum 1mm, maximum 10m)
+    this.R = Math.max(0.001, Math.min(10, R));
+  }
+
+  /**
+   * Update process noise (Q) dynamically for adaptive filtering
+   *
+   * Note: This updates the diagonal Q matrix with the new noise value
+   *
+   * @param Q - New process noise standard deviation (meters)
+   */
+  setProcessNoise(Q: number): void {
+    // Ensure Q is positive and reasonable (minimum 1mm, maximum 1m)
+    const q = Math.max(0.001, Math.min(1, Q));
+    const qSquared = q * q;
+
+    // Update Q matrix (diagonal elements only)
+    this.Q = [
+      [qSquared, 0, 0, 0, 0, 0],
+      [0, qSquared, 0, 0, 0, 0],
+      [0, 0, qSquared, 0, 0, 0],
+      [0, 0, 0, qSquared, 0, 0],
+      [0, 0, 0, 0, qSquared, 0],
+      [0, 0, 0, 0, 0, qSquared],
+    ];
+  }
+
+  /**
+   * Get innovation (prediction error) for adaptive noise estimation
+   *
+   * Innovation = measured_position - predicted_position
+   *
+   * @param measurement - Measured position [x, y, z]
+   * @returns Innovation vector (prediction error)
+   */
+  getInnovation(measurement: [number, number, number]): THREE.Vector3 {
+    const predicted = this.getPosition();
+    return new THREE.Vector3(
+      measurement[0] - predicted.x,
+      measurement[1] - predicted.y,
+      measurement[2] - predicted.z
+    );
+  }
+
+  /**
+   * Get position covariance (3x3 submatrix of P)
+   *
+   * Used for adaptive R estimation via innovation analysis
+   *
+   * @returns 3x3 position covariance matrix
+   */
+  getPositionCovariance(): number[][] {
+    return [
+      [this.P[0][0], this.P[0][1], this.P[0][2]],
+      [this.P[1][0], this.P[1][1], this.P[1][2]],
+      [this.P[2][0], this.P[2][1], this.P[2][2]],
+    ];
   }
 
   // Matrix operations
